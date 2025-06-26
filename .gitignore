@@ -1,0 +1,19 @@
+*.iml
+.gradle
+/local.properties
+
+**/.idea/*
+
+# Keep the code styles to share
+!**/.idea/codeStyles
+!**/.idea/codeStyles/Project.xml
+!**/.idea/codeStyles/codeStyleConfig.xml
+!**/.idea/file/codeStyleConfig.xml
+
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+languagedata/audiosource
