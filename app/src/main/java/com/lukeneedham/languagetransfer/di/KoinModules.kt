@@ -1,5 +1,6 @@
 package com.lukeneedham.languagetransfer.di
 
+import androidx.core.net.toUri
 import com.lukeneedham.languagetransfer.data.network.FileDownloader
 import com.lukeneedham.languagetransfer.data.network.LanguageDownloadRepository
 import com.lukeneedham.languagetransfer.data.persistence.AppDatabase
@@ -17,6 +18,7 @@ import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonViewModel
 import com.lukeneedham.languagetransfer.ui.feature.lessoncompleted.LessonCompletedViewModel
 import com.lukeneedham.languagetransfer.ui.feature.startup.StartupViewModel
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
+import com.lukeneedham.languagetransfer.ui.player.MediaControllerProvider
 import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffectPlayer
 import com.lukeneedham.languagetransfer.util.DebugOptions
 import org.koin.android.ext.koin.androidContext
@@ -43,7 +45,8 @@ object KoinModules {
 
     private val player
         get() = module {
-            factory { AudioPlayerProvider(androidContext()) }
+            factory { MediaControllerProvider(androidContext()) }
+            factory { AudioPlayerProvider(get()) }
         }
 
     private val sfx

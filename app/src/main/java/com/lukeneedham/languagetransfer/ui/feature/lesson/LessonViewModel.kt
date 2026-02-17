@@ -7,24 +7,20 @@ import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.PlaybackException
-import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
 import com.lukeneedham.languagetransfer.data.repository.CompletedLessonRepository
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
 import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
 import com.lukeneedham.languagetransfer.domain.pausepointreport.PausepointReport
 import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonState.InProgress.PlayingState
 import com.lukeneedham.languagetransfer.ui.feature.lesson.pausepointreport.PausepointReporter
+import com.lukeneedham.languagetransfer.ui.player.AudioPlayer
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
 import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffect
 import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffectPlayer
 import com.lukeneedham.languagetransfer.util.DebugOptions
 import com.lukeneedham.languagetransfer.util.model.Millis
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.IOException
 import kotlin.math.absoluteValue
 
 /**
@@ -42,8 +38,10 @@ class LessonViewModel(
 
     private val lessonPausepointProvider = lessonPausepointProviderFactory.build(lesson)
 
-    private var player: ExoPlayer? = null
-    private var progressUpdateJob: Job? = null
+    private val audioPlayer = createAudioPlayer()
+
+    // Using AudioPlayer abstraction instead of media3 Player
+        // The instance is provided via DI as 'audioPlayer' and reused across calls
 
     /** Actual pausepoint values */
     private var pausepoints: List<Millis> = emptyList()
@@ -86,7 +84,6 @@ class LessonViewModel(
     }
 
     init {
-        initializePlayer()
         viewModelScope.launch {
             debugOptions.showDebugLessonControls.collect {
                 showDebugLessonControls = it
@@ -104,8 +101,7 @@ class LessonViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        player?.release()
-        player = null
+        audioPlayer.release()
     }
 
     /**
@@ -136,39 +132,35 @@ class LessonViewModel(
     fun skipBackward() {
         // We may need to retrigger pausepoints
         handledPausepoints.clear()
-        val player = player ?: return
-        val currentPosition = player.currentPosition
+        val currentPosition = audioPlayer.currentPosition
         val newPosition = (currentPosition - 5000).coerceAtLeast(0) // 5 seconds
-        player.seekTo(newPosition)
-        updatePlaybackPosition()
+        audioPlayer.seekTo(newPosition)
+        refreshUiState()
     }
 
     fun togglePlaybackSpeed() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
-        val player = player ?: return
 
         currentSpeedIndex = (currentSpeedIndex + 1) % possibleSpeeds.size
         val playbackSpeed = possibleSpeeds[currentSpeedIndex]
-        player.setPlaybackSpeed(playbackSpeed)
+        audioPlayer.setPlaybackSpeed(playbackSpeed)
         refreshUiState()
     }
 
     fun skipToEnd() {
-        val player = player ?: return
-        val nearEndPosition = player.duration - 5000 // 5 seconds from end
-        player.seekTo(nearEndPosition)
+        val nearEndPosition = audioPlayer.duration - 5000 // 5 seconds from end
+        audioPlayer.seekTo(nearEndPosition)
     }
 
     fun jumpForward() {
-        val player = player ?: return
-        val currentPosition = player.currentPosition
-        val newPosition = (currentPosition + 10000).coerceAtMost(player.duration)
-        player.seekTo(newPosition)
-        updatePlaybackPosition()
+        val currentPosition = audioPlayer.currentPosition
+        val newPosition = (currentPosition + 10000).coerceAtMost(audioPlayer.duration)
+        audioPlayer.seekTo(newPosition)
+        refreshUiState()
     }
 
     fun reportPausepointMissing() {
-        val position = getCurrentPlaybackPosition() ?: return
+        val position = getCurrentPlaybackPosition()
         lessonPausepointProvider.report(
             PausepointReport.Add(position)
         )
@@ -199,16 +191,15 @@ class LessonViewModel(
      * Pauses the current playback.
      */
     private fun pausePlayback(reason: PlayingState.Paused.Reason) {
-        player?.pause()
-        stopProgressUpdates()
+        audioPlayer.pause()
 
         playingState = PlayingState.Paused(reason)
         refreshUiState()
     }
 
     private fun getPausepointFractions(): List<Float> {
-        val player = player ?: return emptyList()
-        val duration = player.duration
+        val duration = audioPlayer.duration
+        if (duration <= 0) return emptyList()
         return triggerPausepoints.map { pausePoint ->
             pausePoint.toFloat() / duration.toFloat()
         }
@@ -219,45 +210,27 @@ class LessonViewModel(
      * Also updates the lastProcessedPausePointIndex to handle pausepoints correctly when resuming.
      */
     private fun resumePlayback() {
-        player?.play()
-        startProgressUpdates()
+        audioPlayer.play()
 
         playingState = PlayingState.Playing
         refreshUiState()
     }
 
     /**
-     * Starts a coroutine job to update the playback progress periodically.
-     */
-    private fun startProgressUpdates() {
-        progressUpdateJob?.cancel()
-        progressUpdateJob = viewModelScope.launch {
-            while (true) {
-                updatePlaybackPosition()
-                delay(progressTickMillis)
-            }
-        }
-    }
-
-    /**
      * Updates the UI state with the current playback position.
      * Also checks if the current position matches any pausepoint and pauses playback if needed.
      */
-    private fun updatePlaybackPosition() {
-        val player = player ?: return
-        val currentPosition = player.currentPosition
-
+    private fun updatePlaybackPosition(currentPosition: Millis) {
         // Check if we need to pause at a pausepoint
-        if (player.isPlaying) {
+        if (audioPlayer.isPlaying) {
             checkPausepoints(currentPosition)
         }
 
         refreshUiState()
     }
 
-    private fun getCurrentPlaybackPosition(): Millis? {
-        val player = player ?: return null
-        return player.currentPosition
+    private fun getCurrentPlaybackPosition(): Millis {
+        return audioPlayer.currentPosition
     }
 
     /**
@@ -292,64 +265,6 @@ class LessonViewModel(
         soundEffectPlayer.play(SoundEffect.Thump, volume = 0.1f)
     }
 
-    /**
-     * Stops the progress update job.
-     */
-    private fun stopProgressUpdates() {
-        progressUpdateJob?.cancel()
-        progressUpdateJob = null
-    }
-
-    /**
-     * Initializes the lesson with the given audio lesson.
-     * This will prepare the MediaPlayer and start playback automatically.
-     */
-    private fun initializePlayer() {
-        try {
-            player = audioPlayerProvider.create(lesson.audioFile.toUri()).apply {
-                addListener(object : Player.Listener {
-                    override fun onPlaybackStateChanged(state: Int) {
-                        when (state) {
-                            Player.STATE_READY -> {
-                                if (playWhenReady) {
-                                    playingState = PlayingState.Playing
-                                    refreshUiState()
-                                }
-                            }
-
-                            Player.STATE_ENDED -> {
-                                viewModelScope.launch {
-                                    delay(completedDelay)
-                                    completedLessonRepository.markLessonAsCompleted(lesson.lessonNumber)
-                                    stopProgressUpdates()
-                                    isCompleted = true
-                                    refreshUiState()
-                                }
-                            }
-
-                            else -> {
-                                // Nothing to do
-                            }
-                        }
-                    }
-
-                    override fun onPlayerError(error: PlaybackException) {
-                        this@LessonViewModel.error = "Error playing audio: ${error.message}"
-                        refreshUiState()
-                        stopProgressUpdates()
-                    }
-                })
-                prepare()
-                play()
-            }
-
-            startProgressUpdates()
-        } catch (e: IOException) {
-            error = "Error loading audio: ${e.message}"
-            refreshUiState()
-        }
-    }
-
     private fun getCurrentPlaybackSpeed() = possibleSpeeds[currentSpeedIndex]
 
     private fun calculateUiState(): LessonState {
@@ -358,12 +273,11 @@ class LessonViewModel(
         val e = error
         if (e != null) return LessonState.Error(e)
 
-        val player = player ?: return LessonState.Loading
         val playingState = playingState ?: return LessonState.Loading
 
         return LessonState.InProgress(
-            currentPosition = player.currentPosition,
-            totalDuration = player.duration,
+            currentPosition = audioPlayer.currentPosition,
+            totalDuration = audioPlayer.duration,
             playingState = playingState,
             pausepointFractions = getPausepointFractions(),
             playbackSpeed = getCurrentPlaybackSpeed(),
@@ -377,8 +291,39 @@ class LessonViewModel(
     }
 
     private fun getClosestPausepoint(): Millis? {
-        val position = getCurrentPlaybackPosition() ?: return null
+        val position = getCurrentPlaybackPosition()
         return pausepoints.minByOrNull { (it - position).absoluteValue }
+    }
+
+    private fun createAudioPlayer(): AudioPlayer {
+        val uri = lesson.audioFile.toUri()
+        val callbacks = object : AudioPlayer.Callbacks {
+            override fun onReady(playWhenReady: Boolean) {
+                if (playWhenReady) {
+                    playingState = PlayingState.Playing
+                    refreshUiState()
+                }
+            }
+
+            override fun onEnded() {
+                viewModelScope.launch {
+                    delay(completedDelay)
+                    completedLessonRepository.markLessonAsCompleted(lesson.lessonNumber)
+                    isCompleted = true
+                    refreshUiState()
+                }
+            }
+
+            override fun onError(message: String) {
+                error = "Error playing audio: $message"
+                refreshUiState()
+            }
+
+            override fun onProgressUpdate(position: Millis) {
+                updatePlaybackPosition(position)
+            }
+        }
+        return audioPlayerProvider.create(uri, callbacks)
     }
 
     private companion object {
