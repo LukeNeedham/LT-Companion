@@ -21,8 +21,6 @@ sealed interface LessonState {
         val showDebugLessonControls: Boolean,
     ) : LessonState
 
-    object Completed : LessonState
-
     /**
      * State when an error occurs during playback.
      */

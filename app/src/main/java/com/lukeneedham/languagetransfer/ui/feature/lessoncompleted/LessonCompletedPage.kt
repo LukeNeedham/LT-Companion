@@ -44,6 +44,5 @@ fun LessonCompletedPage(
         colorScheme = lesson.colorScheme,
         onReturnToHome = viewModel::onReturnToHome,
         onContinueToNextLesson = viewModel::onContinueToNextLesson
-
     )
 }

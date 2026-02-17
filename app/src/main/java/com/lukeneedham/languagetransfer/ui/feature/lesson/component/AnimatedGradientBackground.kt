@@ -16,6 +16,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.platform.LocalInspectionMode
 
 /**
  * A composable that creates a lava lamp-like animated gradient background.
@@ -29,9 +30,20 @@ fun AnimatedGradientBackground(
     colors: List<Color>,
     content: @Composable () -> Unit
 ) {
+    // For previews
+    if (LocalInspectionMode.current) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Gray)
+        ) {
+            content()
+        }
+    }
+
     // Create infinite transitions for the animation
     val infiniteTransition = rememberInfiniteTransition(label = "gradientTransition")
-    
+
     // Animate the x position of the gradient
     val xPosition by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -42,7 +54,7 @@ fun AnimatedGradientBackground(
         ),
         label = "xPosition"
     )
-    
+
     // Animate the y position of the gradient
     val yPosition by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -53,7 +65,7 @@ fun AnimatedGradientBackground(
         ),
         label = "yPosition"
     )
-    
+
     // Animate the size of the gradient
     val size by infiniteTransition.animateFloat(
         initialValue = 0.5f,
@@ -64,7 +76,7 @@ fun AnimatedGradientBackground(
         ),
         label = "size"
     )
-    
+
     // Create the gradient brush with animated properties
     val brush = Brush.radialGradient(
         colors = colors,
@@ -72,7 +84,7 @@ fun AnimatedGradientBackground(
         radius = size * 1000f,
         tileMode = TileMode.Mirror
     )
-    
+
     // Apply the gradient as a background
     Box(
         modifier = Modifier

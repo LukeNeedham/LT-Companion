@@ -3,7 +3,6 @@ package com.lukeneedham.languagetransfer.ui.feature.common
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,8 +17,9 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.lukeneedham.languagetransfer.R
 import com.lukeneedham.languagetransfer.ui.theme.Colors
 
@@ -27,6 +27,7 @@ import com.lukeneedham.languagetransfer.ui.theme.Colors
 fun CutOutGlassyButton(
     /** The painter used for the 'cut-out' shape */
     painter: Painter,
+    contentDescription: String?,
     modifier: Modifier = Modifier
 ) {
     val surface = Colors.glassy
@@ -38,6 +39,11 @@ fun CutOutGlassyButton(
             .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
             .background(color = surface, shape = CircleShape)
             .clip(CircleShape)
+            .semantics {
+                if (contentDescription != null) {
+                    this.contentDescription = contentDescription
+                }
+            }
             .then(modifier)
     ) {
         Box(
@@ -63,6 +69,7 @@ fun CutOutGlassyButton(
 @Composable
 private fun Preview() {
     CutOutGlassyButton(
-        painter = painterResource(R.drawable.ic_play)
+        painter = painterResource(R.drawable.ic_play),
+        contentDescription = null,
     )
 }

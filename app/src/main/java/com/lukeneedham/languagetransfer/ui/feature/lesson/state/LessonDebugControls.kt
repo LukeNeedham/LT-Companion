@@ -15,10 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lukeneedham.languagetransfer.ui.feature.lesson.MockDataLesson
 import com.lukeneedham.languagetransfer.ui.feature.lesson.pausepointreport.PausepointReporter
 import com.lukeneedham.languagetransfer.ui.theme.Colors
 
@@ -27,6 +29,7 @@ fun LessonDebugControls(
     speed: Float,
     togglePlaybackSpeed: () -> Unit,
     skipToEnd: () -> Unit,
+    jumpBackward: () -> Unit,
     jumpForward: () -> Unit,
     pausepointReporter: PausepointReporter,
 ) {
@@ -45,6 +48,7 @@ fun LessonDebugControls(
         ) {
             Button(text = "${speed}x", onClick = togglePlaybackSpeed)
             Button(text = "End", onClick = skipToEnd)
+            Button(text = "Backward", onClick = jumpBackward)
             Button(text = "Forward", onClick = jumpForward)
         }
 
@@ -54,7 +58,8 @@ fun LessonDebugControls(
                 .height(50.dp)
         ) {
             Text(
-                text = "Pausepoints:"
+                text = "Pause:",
+                fontWeight = FontWeight.Bold,
             )
             Button(
                 text = "Add",
@@ -104,13 +109,8 @@ internal fun PreviewLessonDebugControls() {
         speed = 1f,
         togglePlaybackSpeed = {},
         skipToEnd = {},
+        jumpBackward = {},
         jumpForward = {},
-        pausepointReporter = object : PausepointReporter {
-            override fun add() {}
-            override fun remove() {}
-            override fun shiftLater() {}
-            override fun shiftEarlier() {}
-        }
-
+        pausepointReporter = MockDataLesson.pausepointReporter,
     )
 }

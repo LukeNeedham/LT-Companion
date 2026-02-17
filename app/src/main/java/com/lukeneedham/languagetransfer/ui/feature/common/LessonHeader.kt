@@ -35,7 +35,7 @@ fun LessonHeader(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(20.dp)
+            .padding(10.dp)
             .background(
                 color = Color.White.copy(alpha = 0.7f),
                 shape = RoundedCornerShape(20.dp),

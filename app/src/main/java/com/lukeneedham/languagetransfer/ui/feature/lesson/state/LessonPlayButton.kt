@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import com.lukeneedham.languagetransfer.R
 import com.lukeneedham.languagetransfer.ui.feature.common.CutOutGlassyButton
@@ -30,16 +28,13 @@ fun LessonPlayButton(
 
     CutOutGlassyButton(
         painter = imagePainter,
+        contentDescription = when (state) {
+            is PlayingState.Playing -> "Pause"
+            is PlayingState.Paused -> "Play"
+        },
         modifier = Modifier
             .fillMaxSize()
             .clickable { togglePlayPause() }
-            .semantics {
-                val contDesc = when (state) {
-                    is PlayingState.Playing -> "Pause"
-                    is PlayingState.Paused -> "Play"
-                }
-                contentDescription = contDesc
-            }
     )
 }
 

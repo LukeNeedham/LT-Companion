@@ -16,6 +16,7 @@ import com.lukeneedham.languagetransfer.ui.player.AudioPlayer
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
 import com.lukeneedham.languagetransfer.ui.player.PlayingState
 import com.lukeneedham.languagetransfer.util.DebugOptions
+import com.lukeneedham.languagetransfer.util.EventChannel
 import com.lukeneedham.languagetransfer.util.model.Millis
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -36,6 +37,9 @@ class LessonViewModel(
     private val lessonPausepointProvider = lessonPausepointProviderFactory.build(lesson)
 
     private val audioPlayer = createAudioPlayer()
+
+    private val onCompletedMutable = EventChannel()
+    val onCompleted = onCompletedMutable.flow
 
     // Using AudioPlayer abstraction instead of media3 Player
     // The instance is provided via DI as 'audioPlayer' and reused across calls
@@ -94,7 +98,6 @@ class LessonViewModel(
     fun togglePlayPause() {
         val currentState = uiState
         when (currentState) {
-            LessonState.Completed,
             is LessonState.Error,
             LessonState.Loading -> {
                 // Ignore
@@ -191,13 +194,6 @@ class LessonViewModel(
         audioPlayer.play()
     }
 
-    /**
-     * Updates the UI state with the current playback position.
-     */
-    private fun updatePlaybackPosition(currentPosition: Millis) {
-        refreshUiState()
-    }
-
     private fun getCurrentPlaybackPosition(): Millis {
         return audioPlayer.currentPosition
     }
@@ -205,7 +201,9 @@ class LessonViewModel(
     private fun getCurrentPlaybackSpeed() = possibleSpeeds[currentSpeedIndex]
 
     private fun calculateUiState(): LessonState {
-        if (isCompleted) return LessonState.Completed
+        if (isCompleted) {
+            onCompletedMutable.send()
+        }
 
         val e = error
         if (e != null) return LessonState.Error(e)
@@ -253,7 +251,7 @@ class LessonViewModel(
             }
 
             override fun onProgressUpdate(position: Millis) {
-                updatePlaybackPosition(position)
+                refreshUiState()
             }
 
             override fun onPlayingStateChange(state: PlayingState?) {

@@ -32,46 +32,43 @@ fun LessonScaffold(
     belowButtonContent: @Composable () -> Unit,
 ) {
     AnimatedGradientBackground(colors = colors) {
-        Box(Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding()
+                .padding(horizontal = 20.dp)
+        ) {
+            Spacer(modifier = Modifier.height(10.dp))
+
+            LessonHeader(
+                lessonNumber = lessonNumber,
+                onBack = onBack,
+            )
 
             Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .systemBarsPadding()
-                    .padding(20.dp)
+                    .fillMaxWidth()
+                    .weight(1f)
             ) {
-                LessonHeader(
-                    lessonNumber = lessonNumber,
-                    onBack = onBack,
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) {
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        aboveButtonContent()
-                    }
-
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .size(170.dp)
-                    ) {
-                        mainButton()
-                    }
-
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        belowButtonContent()
-                    }
+                Box(modifier = Modifier.weight(2f), contentAlignment = Alignment.Center) {
+                    aboveButtonContent()
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(170.dp)
+                ) {
+                    mainButton()
+                }
+
+                Box(modifier = Modifier.weight(3f), contentAlignment = Alignment.Center) {
+                    belowButtonContent()
+                }
             }
+
+            Spacer(modifier = Modifier.height(15.dp))
         }
     }
 }
