@@ -20,8 +20,9 @@ import kotlinx.coroutines.launch
 class AudioPlayer(
     private val uri: Uri,
     private val lessonNumber: Int,
-    private val mediaControllerProvider: MediaControllerProvider,
     private val callbacks: Callbacks,
+    private val mediaControllerProvider: MediaControllerProvider,
+    private val playbackRepository: PlaybackRepository,
 ) {
     private var controller: MediaController? = null
     private var controllerFuture: ListenableFuture<MediaController>? = null
@@ -29,14 +30,20 @@ class AudioPlayer(
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     interface Callbacks {
-        fun onReady(playWhenReady: Boolean)
-        fun onEnded()
+        fun onComplete()
         fun onError(message: String)
         fun onProgressUpdate(position: Long)
+        fun onPlayingStateChange(state: PlayingState?)
     }
 
     init {
         initialize()
+
+        scope.launch {
+            playbackRepository.playingState.collect {
+                callbacks.onPlayingStateChange(it)
+            }
+        }
     }
 
     private fun initialize() {
@@ -82,8 +89,8 @@ class AudioPlayer(
             override fun onPlaybackStateChanged(state: Int) {
                 when (state) {
                     Player.STATE_READY -> {
-                        callbacks.onReady(c.playWhenReady)
                         if (c.playWhenReady) {
+                            playbackRepository.onStateUpdate(PlayingState.Playing)
                             startProgressUpdates(callbacks)
                         } else {
                             stopProgressUpdates()
@@ -92,7 +99,7 @@ class AudioPlayer(
 
                     Player.STATE_ENDED -> {
                         stopProgressUpdates()
-                        callbacks.onEnded()
+                        callbacks.onComplete()
                     }
                 }
             }
@@ -115,7 +122,8 @@ class AudioPlayer(
         controller?.play()
     }
 
-    fun pause() {
+    fun pauseManual() {
+        // todo: needs to use PlayingState.Paused.Manual
         controller?.pause()
         stopProgressUpdates()
     }

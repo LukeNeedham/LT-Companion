@@ -1,6 +1,7 @@
 package com.lukeneedham.languagetransfer.ui.player
 
 import androidx.media3.common.AudioAttributes
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -15,7 +16,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -30,12 +30,14 @@ class AudioMediaService : MediaSessionService() {
     private var mediaSession: MediaSession? = null
 
     private val pausepointHandler = PausepointHandler(soundEffectPlayer) {
+        playbackRepository.onStateUpdate(PlayingState.Paused(PlayingState.Paused.Reason.Auto))
         player?.pause()
     }
 
     // DI
     private val audioLessonRepository: AudioLessonRepository by inject()
     private val lessonPausepointProviderFactory: LessonPausepointProvider.Factory by inject()
+    private val playbackRepository: PlaybackRepository by inject()
 
     // Scope for collecting pausepoints and checking progress
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -54,16 +56,14 @@ class AudioMediaService : MediaSessionService() {
         player = p
 
         p.addListener(object : Player.Listener {
-            override fun onEvents(player: Player, events: Player.Events) {
-                if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION)) {
-                    updatePausepointsForCurrentItem()
-                }
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                updatePausepointsForCurrentItem()
             }
 
             override fun onPositionDiscontinuity(
                 oldPosition: Player.PositionInfo,
                 newPosition: Player.PositionInfo,
-                reason: Int
+                reason: Int,
             ) {
                 if (reason == Player.DISCONTINUITY_REASON_SEEK) {
                     pausepointHandler.clearHandledPausepoints()
@@ -156,6 +156,7 @@ class AudioMediaService : MediaSessionService() {
             val lesson = when (courseResult) {
                 is AppResult.Success ->
                     courseResult.value.getLessonByNumber(lessonNumber)
+
                 is AppResult.Failure -> null
             } ?: return@launch
 

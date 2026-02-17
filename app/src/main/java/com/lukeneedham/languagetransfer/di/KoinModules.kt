@@ -45,7 +45,12 @@ object KoinModules {
     private val player
         get() = module {
             factory { MediaControllerProvider(androidContext()) }
-            factory { AudioPlayerProvider(get()) }
+            factory {
+                AudioPlayerProvider(
+                    mediaControllerProvider = get(),
+                    playbackRepository = get(),
+                )
+            }
         }
 
     private val sfx

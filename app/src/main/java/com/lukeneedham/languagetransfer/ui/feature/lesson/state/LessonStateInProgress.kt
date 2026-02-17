@@ -28,6 +28,7 @@ import com.lukeneedham.languagetransfer.R
 import com.lukeneedham.languagetransfer.ui.feature.lesson.component.LessonDurationBar
 import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonState
 import com.lukeneedham.languagetransfer.ui.feature.lesson.pausepointreport.PausepointReporter
+import com.lukeneedham.languagetransfer.ui.player.PlayingState
 import com.lukeneedham.languagetransfer.ui.theme.Colors
 
 @Composable
@@ -54,12 +55,12 @@ fun LessonStateInProgress(
         ) {
             val playingState = state.playingState
             val isAutoPaused = when (playingState) {
-                is LessonState.InProgress.PlayingState.Paused -> when (playingState.reason) {
-                    LessonState.InProgress.PlayingState.Paused.Reason.Manual -> false
-                    LessonState.InProgress.PlayingState.Paused.Reason.Auto -> true
+                is PlayingState.Paused -> when (playingState.reason) {
+                    PlayingState.Paused.Reason.Manual -> false
+                    PlayingState.Paused.Reason.Auto -> true
                 }
 
-                is LessonState.InProgress.PlayingState.Playing -> false
+                is PlayingState.Playing -> false
             }
 
             val autoPausedMessageAlpha = if (isAutoPaused) 1f else 0f

@@ -1,5 +1,6 @@
 package com.lukeneedham.languagetransfer.ui.feature.lesson
 
+import com.lukeneedham.languagetransfer.ui.player.PlayingState
 import com.lukeneedham.languagetransfer.util.model.Millis
 
 /**
@@ -18,19 +19,7 @@ sealed interface LessonState {
         val pausepointFractions: List<Float>,
         val playbackSpeed: Float,
         val showDebugLessonControls: Boolean,
-    ) : LessonState {
-        sealed interface PlayingState {
-            object Playing : PlayingState
-            data class Paused(val reason: Reason) : PlayingState {
-                enum class Reason {
-                    Manual,
-
-                    /** Playback was paused automatically because a pausepoint was hit */
-                    Auto,
-                }
-            }
-        }
-    }
+    ) : LessonState
 
     object Completed : LessonState
 

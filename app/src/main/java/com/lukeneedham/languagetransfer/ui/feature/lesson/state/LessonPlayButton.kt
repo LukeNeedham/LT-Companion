@@ -17,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.lukeneedham.languagetransfer.R
 import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonState
+import com.lukeneedham.languagetransfer.ui.player.PlayingState
 
 @Composable
 fun LessonPlayButton(
@@ -33,12 +34,12 @@ fun LessonPlayButton(
             .clickable { togglePlayPause() }
     ) {
         val contDesc = when (state.playingState) {
-            is LessonState.InProgress.PlayingState.Playing -> "Pause"
-            is LessonState.InProgress.PlayingState.Paused -> "Play"
+            is PlayingState.Playing -> "Pause"
+            is PlayingState.Paused -> "Play"
         }
         val imageRes = when (state.playingState) {
-            is LessonState.InProgress.PlayingState.Playing -> R.drawable.ic_pause
-            is LessonState.InProgress.PlayingState.Paused -> R.drawable.ic_play
+            is PlayingState.Playing -> R.drawable.ic_pause
+            is PlayingState.Paused -> R.drawable.ic_play
         }
         Image(
             painter = painterResource(imageRes),

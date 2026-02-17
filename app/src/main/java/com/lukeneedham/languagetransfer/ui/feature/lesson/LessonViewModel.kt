@@ -12,10 +12,11 @@ import com.lukeneedham.languagetransfer.domain.model.CourseLesson
 import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
 import com.lukeneedham.languagetransfer.domain.pausepointreport.PausepointReport
 import androidx.media3.common.util.UnstableApi
-import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonState.InProgress.PlayingState
 import com.lukeneedham.languagetransfer.ui.feature.lesson.pausepointreport.PausepointReporter
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayer
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
+import com.lukeneedham.languagetransfer.ui.player.PlaybackRepository
+import com.lukeneedham.languagetransfer.ui.player.PlayingState
 import com.lukeneedham.languagetransfer.util.DebugOptions
 import com.lukeneedham.languagetransfer.util.model.Millis
 import kotlinx.coroutines.delay
@@ -25,7 +26,6 @@ import kotlin.math.absoluteValue
 /**
  * ViewModel for the Lesson screen that handles audio playback and state management.
  */
-@UnstableApi
 class LessonViewModel(
     private val lesson: CourseLesson,
     private val completedLessonRepository: CompletedLessonRepository,
@@ -104,7 +104,7 @@ class LessonViewModel(
 
             is LessonState.InProgress -> {
                 when (currentState.playingState) {
-                    is PlayingState.Playing -> pausePlayback(PlayingState.Paused.Reason.Manual)
+                    is PlayingState.Playing -> pausePlayback()
                     is PlayingState.Paused -> resumePlayback()
                 }
             }
@@ -174,11 +174,8 @@ class LessonViewModel(
     /**
      * Pauses the current playback.
      */
-    private fun pausePlayback(reason: PlayingState.Paused.Reason) {
-        audioPlayer.pause()
-
-        playingState = PlayingState.Paused(reason)
-        refreshUiState()
+    private fun pausePlayback() {
+        audioPlayer.pauseManual()
     }
 
     private fun getPausepointFractions(): List<Float> {
@@ -194,9 +191,6 @@ class LessonViewModel(
      */
     private fun resumePlayback() {
         audioPlayer.play()
-
-        playingState = PlayingState.Playing
-        refreshUiState()
     }
 
     /**
@@ -243,14 +237,7 @@ class LessonViewModel(
     private fun createAudioPlayer(): AudioPlayer {
         val uri = lesson.audioFile.toUri()
         val callbacks = object : AudioPlayer.Callbacks {
-            override fun onReady(playWhenReady: Boolean) {
-                if (playWhenReady) {
-                    playingState = PlayingState.Playing
-                    refreshUiState()
-                }
-            }
-
-            override fun onEnded() {
+            override fun onComplete() {
                 viewModelScope.launch {
                     delay(completedDelay)
                     completedLessonRepository.markLessonAsCompleted(lesson.lessonNumber)
@@ -266,6 +253,11 @@ class LessonViewModel(
 
             override fun onProgressUpdate(position: Millis) {
                 updatePlaybackPosition(position)
+            }
+
+            override fun onPlayingStateChange(state: PlayingState?) {
+                playingState = state
+                refreshUiState()
             }
         }
         return audioPlayerProvider.create(uri, lesson.lessonNumber, callbacks)
