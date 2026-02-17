@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.lukeneedham.languagetransfer.ui.feature.lesson.component.AnimatedGradientBackground
 
 /**
@@ -25,7 +27,9 @@ fun LessonScaffold(
     lessonNumber: Int,
     colors: List<Color>,
     onBack: () -> Unit,
-    content: @Composable () -> Unit,
+    aboveButtonContent: @Composable () -> Unit,
+    mainButton: @Composable () -> Unit,
+    belowButtonContent: @Composable () -> Unit,
 ) {
     AnimatedGradientBackground(colors = colors) {
         Box(Modifier.fillMaxSize()) {
@@ -43,12 +47,27 @@ fun LessonScaffold(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Box(
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
                 ) {
-                    content()
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        aboveButtonContent()
+                    }
+
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(170.dp)
+                    ) {
+                        mainButton()
+                    }
+
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        belowButtonContent()
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))

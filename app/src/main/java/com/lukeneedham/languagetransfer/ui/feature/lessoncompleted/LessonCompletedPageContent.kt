@@ -2,7 +2,6 @@ package com.lukeneedham.languagetransfer.ui.feature.lessoncompleted
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,10 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,8 +26,11 @@ import com.lukeneedham.languagetransfer.R
 import com.lukeneedham.languagetransfer.ui.feature.common.CutOutGlassyButton
 import com.lukeneedham.languagetransfer.ui.feature.common.LessonScaffold
 import com.lukeneedham.languagetransfer.ui.theme.Colors
+import com.lukeneedham.languagetransfer.ui.util.KonfettiParty
 import com.lukeneedham.languagetransfer.ui.util.color.ColorScheme
+import com.lukeneedham.languagetransfer.ui.util.color.ext.toArgbInts
 import com.lukeneedham.languagetransfer.ui.util.color.ext.toComposeColors
+import nl.dionsegijn.konfetti.compose.KonfettiView
 
 @Composable
 fun LessonCompletedPageContent(
@@ -42,14 +44,7 @@ fun LessonCompletedPageContent(
         lessonNumber = lessonNumber,
         colors = colorScheme.toComposeColors(),
         onBack = onReturnToHome,
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(20.dp)
-        ) {
+        aboveButtonContent = {
             val title = if (hasCompletedCourse) {
                 "Course completed!"
             } else {
@@ -84,19 +79,26 @@ fun LessonCompletedPageContent(
                     )
                 }
             }
-
+        },
+        mainButton = {
             if (!hasCompletedCourse) {
-                Spacer(modifier = Modifier.height(30.dp))
-
                 CutOutGlassyButton(
                     painter = painterResource(R.drawable.ic_play),
                     modifier = Modifier
-                        .size(150.dp)
+                        .fillMaxSize()
                         .clickable { onContinueToNextLesson() }
                 )
+            } else {
+                CutOutGlassyButton(
+                    painter = painterResource(R.drawable.ic_tick),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { onReturnToHome() }
+                )
             }
-        }
-    }
+        },
+        belowButtonContent = {},
+    )
 }
 
 @Preview
