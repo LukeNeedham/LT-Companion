@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,8 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lukeneedham.languagetransfer.R
 import com.lukeneedham.languagetransfer.ui.feature.common.CutOutGlassyButton
-import com.lukeneedham.languagetransfer.ui.feature.common.LessonHeader
-import com.lukeneedham.languagetransfer.ui.feature.lesson.component.AnimatedGradientBackground
+import com.lukeneedham.languagetransfer.ui.feature.common.LessonScaffold
 import com.lukeneedham.languagetransfer.ui.theme.Colors
 import com.lukeneedham.languagetransfer.ui.util.color.ColorScheme
 import com.lukeneedham.languagetransfer.ui.util.color.ext.toComposeColors
@@ -40,78 +38,63 @@ fun LessonCompletedPageContent(
     onReturnToHome: () -> Unit,
     onContinueToNextLesson: () -> Unit,
 ) {
-    AnimatedGradientBackground(
-        colors = colorScheme.toComposeColors()
+    LessonScaffold(
+        lessonNumber = lessonNumber,
+        colors = colorScheme.toComposeColors(),
+        onBack = onReturnToHome,
     ) {
         Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxSize()
-                .systemBarsPadding()
                 .padding(20.dp)
         ) {
-            LessonHeader(
-                lessonNumber = lessonNumber,
-                onBack = onReturnToHome,
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
+            val title = if (hasCompletedCourse) {
+                "Course completed!"
+            } else {
+                "Lesson completed!"
+            }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                    .padding(20.dp)
-            ) {
-                val title = if (hasCompletedCourse) {
-                    "Course completed!"
-                } else {
-                    "Lesson completed!"
-                }
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 10.dp)
-                        .background(
-                            color = Colors.glassy,
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .padding(horizontal = 20.dp, vertical = 30.dp)
-                ) {
-                    Text(
-                        text = title,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black,
-                        textAlign = TextAlign.Center
+                    .padding(horizontal = 10.dp)
+                    .background(
+                        color = Colors.glassy,
+                        shape = RoundedCornerShape(20.dp)
                     )
-
-                    if (!hasCompletedCourse) {
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(
-                            text = "Ready for the next one?",
-                            fontSize = 14.sp,
-                            color = Color.Black,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
+                    .padding(horizontal = 20.dp, vertical = 30.dp)
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
 
                 if (!hasCompletedCourse) {
-                    Spacer(modifier = Modifier.height(30.dp))
-
-                    CutOutGlassyButton(
-                        painter = painterResource(R.drawable.ic_play),
-                        modifier = Modifier
-                            .size(150.dp)
-                            .clickable { onContinueToNextLesson() }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "Ready for the next one?",
+                        fontSize = 14.sp,
+                        color = Color.Black,
+                        textAlign = TextAlign.Center
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            if (!hasCompletedCourse) {
+                Spacer(modifier = Modifier.height(30.dp))
+
+                CutOutGlassyButton(
+                    painter = painterResource(R.drawable.ic_play),
+                    modifier = Modifier
+                        .size(150.dp)
+                        .clickable { onContinueToNextLesson() }
+                )
+            }
         }
     }
 }

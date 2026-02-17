@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lukeneedham.languagetransfer.ui.feature.lesson.pausepointreport.PausepointReporter
@@ -35,7 +36,7 @@ fun LessonDebugControls(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .background(color = surface, shape = RoundedCornerShape(20.dp))
-            .padding(10.dp)
+            .padding(5.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -47,12 +48,14 @@ fun LessonDebugControls(
             Button(text = "Forward", onClick = jumpForward)
         }
 
-        Text(text = "Pausepoint Edits", fontSize = 15.sp)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .height(50.dp)
         ) {
+            Text(
+                text = "Pausepoints:"
+            )
             Button(
                 text = "Add",
                 onClick = { pausepointReporter.add() }
@@ -62,11 +65,11 @@ fun LessonDebugControls(
                 onClick = { pausepointReporter.remove() }
             )
             Button(
-                text = "Shift earlier",
+                text = "Shift\nearlier",
                 onClick = { pausepointReporter.shiftEarlier() }
             )
             Button(
-                text = "Shift later",
+                text = "Shift\nlater",
                 onClick = { pausepointReporter.shiftLater() }
             )
         }
@@ -92,4 +95,22 @@ private fun RowScope.Button(
             fontSize = 12.sp,
         )
     }
+}
+
+@Preview
+@Composable
+internal fun PreviewLessonDebugControls() {
+    LessonDebugControls(
+        speed = 1f,
+        togglePlaybackSpeed = {},
+        skipToEnd = {},
+        jumpForward = {},
+        pausepointReporter = object : PausepointReporter {
+            override fun add() {}
+            override fun remove() {}
+            override fun shiftLater() {}
+            override fun shiftEarlier() {}
+        }
+
+    )
 }
