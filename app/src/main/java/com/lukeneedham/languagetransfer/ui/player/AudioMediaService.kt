@@ -8,6 +8,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import com.lukeneedham.languagetransfer.R
 import com.lukeneedham.languagetransfer.data.repository.AudioLessonRepository
 import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
 import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffectPlayer
@@ -30,7 +31,7 @@ class AudioMediaService : MediaSessionService() {
     private var mediaSession: MediaSession? = null
 
     private val pausepointHandler = PausepointHandler(soundEffectPlayer) {
-        playbackRepository.onStateUpdate(PlayingState.Paused(PlayingState.Paused.Reason.Auto))
+        lastPauseReason = PlayingState.Paused.Reason.Auto
         player?.pause()
     }
 
@@ -43,6 +44,9 @@ class AudioMediaService : MediaSessionService() {
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var pausepointsJob: Job? = null
     private var checkPausepointsJob: Job? = null
+
+    // Track the reason for the most recent pause (if initiated internally, e.g., pausepoint)
+    private var lastPauseReason: PlayingState.Paused.Reason? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -72,8 +76,16 @@ class AudioMediaService : MediaSessionService() {
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (isPlaying) {
+                    // Resumed
+                    playbackRepository.onStateUpdate(PlayingState.Playing)
                     startPausepointCheck()
                 } else {
+                    // Paused: reason is Auto if set by pausepoint handler, otherwise Manual
+                    val reason = lastPauseReason ?: PlayingState.Paused.Reason.Manual
+                    // Reset reason
+                    lastPauseReason = null
+
+                    playbackRepository.onStateUpdate(PlayingState.Paused(reason))
                     stopPausepointCheck()
                 }
             }
@@ -101,7 +113,7 @@ class AudioMediaService : MediaSessionService() {
         setMediaNotificationProvider(
             DefaultMediaNotificationProvider.Builder(this)
                 .setChannelId("audio_playback")
-                .setChannelName(com.lukeneedham.languagetransfer.R.string.app_name)
+                .setChannelName(R.string.app_name)
                 .build()
         )
 

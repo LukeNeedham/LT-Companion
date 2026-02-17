@@ -11,11 +11,9 @@ import com.lukeneedham.languagetransfer.data.repository.CompletedLessonRepositor
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
 import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
 import com.lukeneedham.languagetransfer.domain.pausepointreport.PausepointReport
-import androidx.media3.common.util.UnstableApi
 import com.lukeneedham.languagetransfer.ui.feature.lesson.pausepointreport.PausepointReporter
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayer
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
-import com.lukeneedham.languagetransfer.ui.player.PlaybackRepository
 import com.lukeneedham.languagetransfer.ui.player.PlayingState
 import com.lukeneedham.languagetransfer.util.DebugOptions
 import com.lukeneedham.languagetransfer.util.model.Millis
@@ -40,7 +38,7 @@ class LessonViewModel(
     private val audioPlayer = createAudioPlayer()
 
     // Using AudioPlayer abstraction instead of media3 Player
-        // The instance is provided via DI as 'audioPlayer' and reused across calls
+    // The instance is provided via DI as 'audioPlayer' and reused across calls
 
     /** Actual pausepoint values */
     private var pausepoints: List<Millis> = emptyList()
@@ -87,7 +85,7 @@ class LessonViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        audioPlayer.release()
+        audioPlayer.stop()
     }
 
     /**
@@ -175,7 +173,7 @@ class LessonViewModel(
      * Pauses the current playback.
      */
     private fun pausePlayback() {
-        audioPlayer.pauseManual()
+        audioPlayer.pause()
     }
 
     private fun getPausepointFractions(): List<Float> {
@@ -214,9 +212,12 @@ class LessonViewModel(
 
         val playingState = playingState ?: return LessonState.Loading
 
+        val duration = audioPlayer.duration
+        if (duration == 0L) return LessonState.Loading
+
         return LessonState.InProgress(
             currentPosition = audioPlayer.currentPosition,
-            totalDuration = audioPlayer.duration,
+            totalDuration = duration,
             playingState = playingState,
             pausepointFractions = getPausepointFractions(),
             playbackSpeed = getCurrentPlaybackSpeed(),

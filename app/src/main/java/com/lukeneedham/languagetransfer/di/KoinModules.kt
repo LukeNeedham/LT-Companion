@@ -18,6 +18,7 @@ import com.lukeneedham.languagetransfer.ui.feature.lessoncompleted.LessonComplet
 import com.lukeneedham.languagetransfer.ui.feature.startup.StartupViewModel
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
 import com.lukeneedham.languagetransfer.ui.player.MediaControllerProvider
+import com.lukeneedham.languagetransfer.ui.player.PlaybackRepository
 import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffectPlayer
 import com.lukeneedham.languagetransfer.util.DebugOptions
 import org.koin.android.ext.koin.androidContext
@@ -45,6 +46,9 @@ object KoinModules {
     private val player
         get() = module {
             factory { MediaControllerProvider(androidContext()) }
+            single {
+                PlaybackRepository()
+            }
             factory {
                 AudioPlayerProvider(
                     mediaControllerProvider = get(),

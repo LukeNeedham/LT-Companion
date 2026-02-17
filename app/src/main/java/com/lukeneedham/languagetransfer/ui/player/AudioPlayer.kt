@@ -90,7 +90,6 @@ class AudioPlayer(
                 when (state) {
                     Player.STATE_READY -> {
                         if (c.playWhenReady) {
-                            playbackRepository.onStateUpdate(PlayingState.Playing)
                             startProgressUpdates(callbacks)
                         } else {
                             stopProgressUpdates()
@@ -122,10 +121,15 @@ class AudioPlayer(
         controller?.play()
     }
 
-    fun pauseManual() {
-        // todo: needs to use PlayingState.Paused.Manual
+    fun pause() {
         controller?.pause()
-        stopProgressUpdates()
+    }
+
+    fun stop() {
+        controller?.stop()
+        // This removes the media notification
+        controller?.clearMediaItems()
+        release()
     }
 
     fun seekTo(positionMs: Long) {
@@ -136,14 +140,13 @@ class AudioPlayer(
         controller?.setPlaybackSpeed(speed)
     }
 
-
     private fun startProgressUpdates(callbacks: Callbacks) {
         progressJob?.cancel()
         progressJob = scope.launch {
             while (true) {
                 val pos = controller?.currentPosition ?: 0L
                 callbacks.onProgressUpdate(pos)
-                delay(10) // Matches LessonViewModel.progressTickMillis
+                delay(10)
             }
         }
     }
@@ -153,11 +156,10 @@ class AudioPlayer(
         progressJob = null
     }
 
-    val isPlaying: Boolean get() = controller?.isPlaying == true
     val currentPosition: Long get() = controller?.currentPosition ?: 0L
     val duration: Long get() = controller?.duration ?: 0L
 
-    fun release() {
+    private fun release() {
         controllerFuture?.cancel(true)
         controllerFuture = null
         controller?.release()
