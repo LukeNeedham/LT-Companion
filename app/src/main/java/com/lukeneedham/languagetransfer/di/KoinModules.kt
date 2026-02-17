@@ -1,6 +1,5 @@
 package com.lukeneedham.languagetransfer.di
 
-import androidx.core.net.toUri
 import com.lukeneedham.languagetransfer.data.network.FileDownloader
 import com.lukeneedham.languagetransfer.data.network.LanguageDownloadRepository
 import com.lukeneedham.languagetransfer.data.persistence.AppDatabase
@@ -97,7 +96,6 @@ object KoinModules {
                     debugOptions = get(),
                     lessonPausepointProviderFactory = get(),
                     audioPlayerProvider = get(),
-                    soundEffectPlayer = get(),
                 )
             }
             viewModel { (lesson: CourseLesson) -> LessonCompletedViewModel(lesson, get(), get()) }

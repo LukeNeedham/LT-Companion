@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
  */
 class AudioPlayer(
     private val uri: Uri,
+    private val lessonNumber: Int,
     private val mediaControllerProvider: MediaControllerProvider,
     private val callbacks: Callbacks,
 ) {
@@ -43,7 +44,7 @@ class AudioPlayer(
         val existing = controller
         if (existing != null) {
             wireCallbacks(existing, callbacks)
-            existing.setMediaItem(MediaItem.fromUri(uri))
+            existing.setMediaItem(buildMediaItem())
             existing.prepare()
             existing.play()
             return
@@ -57,7 +58,7 @@ class AudioPlayer(
                     val c = future.get()
                     controller = c
                     wireCallbacks(c, callbacks)
-                    c.setMediaItem(MediaItem.fromUri(uri))
+                    c.setMediaItem(buildMediaItem())
                     c.prepare()
                     c.play()
                 } catch (e: Exception) {
@@ -65,6 +66,13 @@ class AudioPlayer(
                 }
             }
         }, { it.run() })
+    }
+
+    private fun buildMediaItem(): MediaItem {
+        return MediaItem.Builder()
+            .setUri(uri)
+            .setMediaId(lessonNumber.toString())
+            .build()
     }
 
     private fun wireCallbacks(c: MediaController, callbacks: Callbacks) {
@@ -119,6 +127,7 @@ class AudioPlayer(
     fun setPlaybackSpeed(speed: Float) {
         controller?.setPlaybackSpeed(speed)
     }
+
 
     private fun startProgressUpdates(callbacks: Callbacks) {
         progressJob?.cancel()

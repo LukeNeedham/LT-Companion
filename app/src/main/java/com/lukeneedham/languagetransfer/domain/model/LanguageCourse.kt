@@ -15,4 +15,8 @@ data class LanguageCourse(
      */
     val lessonCount: Int
         get() = lessons.size
+
+    fun getLessonByNumber(lessonNumber: Int): CourseLesson? {
+        return lessons.firstOrNull { it.lessonNumber == lessonNumber }
+    }
 }

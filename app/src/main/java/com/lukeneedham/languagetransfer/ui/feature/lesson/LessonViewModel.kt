@@ -11,12 +11,11 @@ import com.lukeneedham.languagetransfer.data.repository.CompletedLessonRepositor
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
 import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
 import com.lukeneedham.languagetransfer.domain.pausepointreport.PausepointReport
+import androidx.media3.common.util.UnstableApi
 import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonState.InProgress.PlayingState
 import com.lukeneedham.languagetransfer.ui.feature.lesson.pausepointreport.PausepointReporter
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayer
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
-import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffect
-import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffectPlayer
 import com.lukeneedham.languagetransfer.util.DebugOptions
 import com.lukeneedham.languagetransfer.util.model.Millis
 import kotlinx.coroutines.delay
@@ -26,13 +25,13 @@ import kotlin.math.absoluteValue
 /**
  * ViewModel for the Lesson screen that handles audio playback and state management.
  */
+@UnstableApi
 class LessonViewModel(
     private val lesson: CourseLesson,
     private val completedLessonRepository: CompletedLessonRepository,
     private val debugOptions: DebugOptions,
     private val lessonPausepointProviderFactory: LessonPausepointProvider.Factory,
     private val audioPlayerProvider: AudioPlayerProvider,
-    private val soundEffectPlayer: SoundEffectPlayer,
 ) : ViewModel() {
     private val possibleSpeeds = listOf(1.0f, 1.7f)
 
@@ -50,17 +49,6 @@ class LessonViewModel(
     private var playingState: PlayingState? = null
     private var isCompleted: Boolean = false
     private var error: String? = null
-
-    /** The points at which the pausepoint trigger should fire */
-    private val triggerPausepoints: List<Millis>
-        get() = pausepoints.map { (it - pausepointTriggerOffset).coerceAtLeast(0) }
-
-    /**
-     * The pausepoints which have been handled by auto-pausing them.
-     * Each pausepoint gets handled exactly once,
-     * so if the user skips back in time the pausepoint is not re-triggered.
-     */
-    private val handledPausepoints = mutableListOf<Millis>()
 
     var uiState by mutableStateOf<LessonState>(LessonState.Loading)
         private set
@@ -92,8 +80,6 @@ class LessonViewModel(
         viewModelScope.launch {
             lessonPausepointProvider.pausepoints.collect { pps ->
                 pausepoints = pps
-                // Reset handled pausepoints when pausepoints change
-                handledPausepoints.clear()
                 refreshUiState()
             }
         }
@@ -127,11 +113,9 @@ class LessonViewModel(
 
     /**
      * Skips backward by 5 seconds.
-     * Also resets the lastProcessedPausePointIndex to allow pausing at pausepoints we've already passed.
+     * Also resets the last processed pausepoint index to allow pausing at pausepoints we've already passed.
      */
     fun skipBackward() {
-        // We may need to retrigger pausepoints
-        handledPausepoints.clear()
         val currentPosition = audioPlayer.currentPosition
         val newPosition = (currentPosition - 5000).coerceAtLeast(0) // 5 seconds
         audioPlayer.seekTo(newPosition)
@@ -200,14 +184,13 @@ class LessonViewModel(
     private fun getPausepointFractions(): List<Float> {
         val duration = audioPlayer.duration
         if (duration <= 0) return emptyList()
-        return triggerPausepoints.map { pausePoint ->
+        return pausepoints.map { pausePoint ->
             pausePoint.toFloat() / duration.toFloat()
         }
     }
 
     /**
      * Resumes the paused playback.
-     * Also updates the lastProcessedPausePointIndex to handle pausepoints correctly when resuming.
      */
     private fun resumePlayback() {
         audioPlayer.play()
@@ -218,51 +201,13 @@ class LessonViewModel(
 
     /**
      * Updates the UI state with the current playback position.
-     * Also checks if the current position matches any pausepoint and pauses playback if needed.
      */
     private fun updatePlaybackPosition(currentPosition: Millis) {
-        // Check if we need to pause at a pausepoint
-        if (audioPlayer.isPlaying) {
-            checkPausepoints(currentPosition)
-        }
-
         refreshUiState()
     }
 
     private fun getCurrentPlaybackPosition(): Millis {
         return audioPlayer.currentPosition
-    }
-
-    /**
-     * Checks if the current position matches any pausepoint and pauses playback if needed.
-     *
-     * @param currentPosition The current playback position in milliseconds
-     */
-    private fun checkPausepoints(currentPosition: Millis) {
-        val nextPausepoint = triggerPausepoints.firstOrNull { pausepoint ->
-            pausepoint > currentPosition
-        } ?: return
-
-        val millisUntilPausepoint = nextPausepoint - currentPosition
-
-        /**
-         * If diff is bigger than progress tick millis then we shouldn't pause yet -
-         * we should pause in a future next tick.
-         * That said, due to the imperfect nature of ticking and progress rounding,
-         * we also don't want to risk missing any pausepoints.
-         * For that reason we include the next tick too, in case it would somehow be missed.
-         */
-        val maxMillisDelta = progressTickMillis * 2
-        if (millisUntilPausepoint > maxMillisDelta) return
-
-        // Pausepoint has already been handled - nothing to do
-        if (nextPausepoint in handledPausepoints) return
-
-        handledPausepoints.add(nextPausepoint)
-
-        pausePlayback(PlayingState.Paused.Reason.Auto)
-        // Just a soft thump
-        soundEffectPlayer.play(SoundEffect.Thump, volume = 0.1f)
     }
 
     private fun getCurrentPlaybackSpeed() = possibleSpeeds[currentSpeedIndex]
@@ -323,19 +268,11 @@ class LessonViewModel(
                 updatePlaybackPosition(position)
             }
         }
-        return audioPlayerProvider.create(uri, callbacks)
+        return audioPlayerProvider.create(uri, lesson.lessonNumber, callbacks)
     }
 
     private companion object {
-        const val progressTickMillis: Millis = 10
-
         /** Wait a sec after the end of the audio before moving onto the completed state */
         const val completedDelay: Millis = 500
-
-        /**
-         * Offset pointpoints a little bit so they trigger in the player
-         * just before the speaking starts
-         */
-        const val pausepointTriggerOffset: Millis = 0 // 300
     }
 }
