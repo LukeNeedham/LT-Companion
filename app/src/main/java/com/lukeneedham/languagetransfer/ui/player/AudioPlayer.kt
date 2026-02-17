@@ -12,7 +12,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.concurrent.Executors
 
 /**
  * Thin abstraction around Media3 MediaController used by the UI layer.
@@ -52,21 +51,20 @@ class AudioPlayer(
 
         val future = mediaControllerProvider.buildAsync()
         controllerFuture = future
-        val executor = Executors.newSingleThreadExecutor()
         future.addListener({
-            try {
-                val c = future.get()
-                controller = c
-                wireCallbacks(c, callbacks)
-                c.setMediaItem(MediaItem.fromUri(uri))
-                c.prepare()
-                c.play()
-            } catch (e: Exception) {
-                callbacks.onError(e.message ?: "Unknown error")
-            } finally {
-                executor.shutdown()
+            scope.launch {
+                try {
+                    val c = future.get()
+                    controller = c
+                    wireCallbacks(c, callbacks)
+                    c.setMediaItem(MediaItem.fromUri(uri))
+                    c.prepare()
+                    c.play()
+                } catch (e: Exception) {
+                    callbacks.onError(e.message ?: "Unknown error")
+                }
             }
-        }, executor)
+        }, { it.run() })
     }
 
     private fun wireCallbacks(c: MediaController, callbacks: Callbacks) {
