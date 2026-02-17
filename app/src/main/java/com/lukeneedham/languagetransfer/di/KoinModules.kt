@@ -114,6 +114,13 @@ object KoinModules {
                     audioPlayerProvider = get(),
                 )
             }
-            viewModel { (lesson: CourseLesson) -> LessonCompletedViewModel(lesson, get(), get()) }
+            viewModel { (lesson: CourseLesson) ->
+                LessonCompletedViewModel(
+                    currentLesson = lesson,
+                    audioLessonRepository = get(),
+                    soundEffectPlayer = get(),
+                    playbackRepository = get(),
+                )
+            }
         }
 }

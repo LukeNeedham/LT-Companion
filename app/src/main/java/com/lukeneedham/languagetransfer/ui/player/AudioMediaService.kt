@@ -1,5 +1,7 @@
 package com.lukeneedham.languagetransfer.ui.player
 
+import android.content.Intent
+import android.view.KeyEvent
 import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.MediaItem
@@ -104,7 +106,44 @@ class AudioMediaService : MediaSessionService() {
             startPausepointCheck()
         }
 
-        mediaSession = MediaSession.Builder(this, p).build()
+        val mediaSessionCallback = object : MediaSession.Callback {
+            // Inside your MediaSession.Callback
+            override fun onMediaButtonEvent(
+                session: MediaSession,
+                controllerInfo: MediaSession.ControllerInfo,
+                intent: Intent,
+            ): Boolean {
+                val p = player
+                val isPlaying = p != null && p.mediaItemCount > 0
+                // Delegate to system if currently playing
+                if (isPlaying) return false
+
+                val keyEvent =
+                    intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, KeyEvent::class.java)
+
+                val unhandledResumeKeycodes = listOf(
+                    KeyEvent.KEYCODE_MEDIA_PLAY,
+                    KeyEvent.KEYCODE_MEDIA_PAUSE,
+                    KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                    KeyEvent.KEYCODE_HEADSETHOOK,
+                    KeyEvent.KEYCODE_MEDIA_NEXT,
+                )
+                val isUnhandledResume =
+                    keyEvent?.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode in unhandledResumeKeycodes
+
+                // Delegate to rest of app
+                if (isUnhandledResume) {
+                    playbackRepository.onUnhandledResumeEvent()
+                    return true
+                }
+
+                // Not delegated to app, let system handle it
+                return false
+            }
+        }
+        mediaSession = MediaSession.Builder(this, p)
+            .setCallback(mediaSessionCallback)
+            .build()
 
         setupNotification()
 

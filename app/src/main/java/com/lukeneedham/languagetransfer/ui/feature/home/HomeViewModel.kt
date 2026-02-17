@@ -10,7 +10,7 @@ import com.lukeneedham.languagetransfer.data.repository.CompletedLessonRepositor
 import com.lukeneedham.languagetransfer.ui.feature.home.model.LessonProgress
 import com.lukeneedham.languagetransfer.util.AppResult
 import com.lukeneedham.languagetransfer.util.DebugOptions
-import com.lukeneedham.languagetransfer.util.EventChannel
+import com.lukeneedham.languagetransfer.util.EventDataChannel
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
@@ -30,7 +30,7 @@ class HomeViewModel(
     var uiState by mutableStateOf<HomeState>(HomeState.Loading)
         private set
 
-    private val _scrollToLessonFlow = EventChannel<Int>()
+    private val _scrollToLessonFlow = EventDataChannel<Int>()
     val scrollToCurrentLessonFlow = _scrollToLessonFlow.asSharedFlow()
 
     init {

@@ -1,5 +1,6 @@
 package com.lukeneedham.languagetransfer.ui.player
 
+import com.lukeneedham.languagetransfer.util.EventChannel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -12,7 +13,14 @@ class PlaybackRepository {
     private val playingStateMutable = MutableStateFlow<PlayingState?>(null)
     val playingState = playingStateMutable.asStateFlow()
 
+    private val resumeChannelMutable = EventChannel()
+    val resumeChannel = resumeChannelMutable.flow
+
     fun onStateUpdate(state: PlayingState) {
         playingStateMutable.value = state
+    }
+
+    fun onUnhandledResumeEvent() {
+        resumeChannelMutable.send()
     }
 }
