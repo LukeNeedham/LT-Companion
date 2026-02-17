@@ -82,7 +82,7 @@ fun LessonStateInProgress(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.weight(1f)
             ) {
-                LessonPlayButton(surface, togglePlayPause, state)
+                LessonPlayButton(surface, togglePlayPause, state.playingState)
             }
 
             Box(

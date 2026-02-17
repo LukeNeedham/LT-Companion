@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.lukeneedham.languagetransfer"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.lukeneedham.languagetransfer"
-        minSdk = 21
-        targetSdk = 35
+        minSdk = 23
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -75,6 +75,7 @@ dependencies {
     // Room for database
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.compose.animation.graphics)
     ksp(libs.androidx.room.compiler)
 
     // Konfetti
