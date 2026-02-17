@@ -1,5 +1,6 @@
 package com.lukeneedham.languagetransfer.ui.player
 
+import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -22,7 +23,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
-@UnstableApi
 class AudioMediaService : MediaSessionService() {
 
     private val soundEffectPlayer = SoundEffectPlayer
@@ -105,17 +105,9 @@ class AudioMediaService : MediaSessionService() {
             startPausepointCheck()
         }
 
-        mediaSession = MediaSession.Builder(this, p)
-            .setCallback(object : MediaSession.Callback {})
-            .build()
+        mediaSession = MediaSession.Builder(this, p).build()
 
-        // Provide a default media style notification; the service will manage foreground state
-        setMediaNotificationProvider(
-            DefaultMediaNotificationProvider.Builder(this)
-                .setChannelId("audio_playback")
-                .setChannelName(R.string.app_name)
-                .build()
-        )
+        setupNotification()
 
         // Attempt initial pausepoints setup (in case item already set before listener fires)
         updatePausepointsForCurrentItem()
@@ -179,4 +171,13 @@ class AudioMediaService : MediaSessionService() {
         }
     }
 
+    @OptIn(UnstableApi::class)
+    private fun setupNotification() {
+        setMediaNotificationProvider(
+            DefaultMediaNotificationProvider.Builder(this)
+                .setChannelId("audio_playback")
+                .setChannelName(R.string.app_name)
+                .build()
+        )
+    }
 }
