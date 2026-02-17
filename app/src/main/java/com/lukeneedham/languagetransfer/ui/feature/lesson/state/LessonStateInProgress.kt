@@ -22,11 +22,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lukeneedham.languagetransfer.R
-import com.lukeneedham.languagetransfer.ui.feature.lesson.component.LessonDurationBar
 import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonState
+import com.lukeneedham.languagetransfer.ui.feature.lesson.component.LessonDurationBar
 import com.lukeneedham.languagetransfer.ui.feature.lesson.pausepointreport.PausepointReporter
 import com.lukeneedham.languagetransfer.ui.player.PlayingState
 import com.lukeneedham.languagetransfer.ui.theme.Colors
@@ -73,7 +74,11 @@ fun LessonStateInProgress(
                     .background(color = surface, shape = RoundedCornerShape(20.dp))
                     .padding(20.dp)
             ) {
-                Text(text = "Auto paused", fontSize = 20.sp)
+                Text(
+                    text = "Auto paused",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    )
                 Spacer(modifier = Modifier.height(5.dp))
                 Text(text = "Think for yourself before resuming", fontSize = 14.sp)
             }
@@ -82,7 +87,7 @@ fun LessonStateInProgress(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.weight(1f)
             ) {
-                LessonPlayButton(surface, togglePlayPause, state.playingState)
+                LessonPlayButton(togglePlayPause = togglePlayPause, state = state.playingState)
             }
 
             Box(

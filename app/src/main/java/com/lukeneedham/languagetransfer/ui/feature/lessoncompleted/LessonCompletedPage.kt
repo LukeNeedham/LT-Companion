@@ -36,7 +36,7 @@ fun LessonCompletedPage(
         }
     }
 
-    SystemBarsColor(useDarkIcons = true)
+    SystemBarsColor(useDarkIcons = false)
 
     LessonCompletedPageContent(
         lessonNumber = lesson.lessonNumber,

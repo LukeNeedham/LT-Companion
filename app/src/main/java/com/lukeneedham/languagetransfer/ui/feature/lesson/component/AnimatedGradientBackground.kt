@@ -26,12 +26,7 @@ import androidx.compose.ui.graphics.TileMode
  */
 @Composable
 fun AnimatedGradientBackground(
-    colors: List<Color> = listOf(
-        Color(0xFFFF5F6D), // Warm red
-        Color(0xFFFFC371), // Warm orange
-        Color(0xFFFF9A5A), // Warm yellow-orange
-        Color(0xFFFF7EB3)  // Warm pink
-    ),
+    colors: List<Color>,
     content: @Composable () -> Unit
 ) {
     // Create infinite transitions for the animation
