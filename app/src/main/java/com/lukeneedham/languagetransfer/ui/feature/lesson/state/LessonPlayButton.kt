@@ -39,13 +39,14 @@ fun LessonPlayButton(
     state: PlayingState,
 ) {
     val image = AnimatedImageVector.animatedVectorResource(R.drawable.avd_play_pause)
-    val atEnd = state is PlayingState.Playing
+    /** Our AVD is built such that start state is play icon, end state is pause icon */
+    val atEnd = state is PlayingState.Paused
     val imagePainter = rememberAnimatedVectorPainter(image, atEnd)
 
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(150.dp)
+            .size(170.dp)
             // Create a separate layer for blending to work within
             .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
             .background(color = surface, shape = CircleShape)
@@ -61,7 +62,7 @@ fun LessonPlayButton(
     ) {
         Box(
             modifier = Modifier
-                .fillMaxSize(0.5f)
+                .fillMaxSize(0.6f)
                 .drawWithContent {
                     drawIntoCanvas { canvas ->
                         val paint = Paint().apply {
