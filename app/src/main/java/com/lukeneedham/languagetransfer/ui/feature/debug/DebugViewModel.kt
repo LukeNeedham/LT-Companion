@@ -21,6 +21,7 @@ class DebugViewModel(
 ) : ViewModel() {
     val allLessonsCompleted = debugOptions.allLessonsCompleted
     val showDebugLessonControls = debugOptions.showDebugLessonControls
+    val shouldAutoPause = debugOptions.shouldAutoPause
 
     var modifiedPausepointsJson by mutableStateOf("")
         private set
@@ -44,6 +45,10 @@ class DebugViewModel(
 
     fun setShowDebugLessonControls(value: Boolean) {
         debugOptions.setShowDebugLessonControls(value)
+    }
+
+    fun setShouldAutoPause(value: Boolean) {
+        debugOptions.setShouldAutoPause(value)
     }
 
     private fun getModifiedPausepointsJsonFlow(): Flow<String>? {

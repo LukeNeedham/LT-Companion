@@ -8,7 +8,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -20,10 +19,11 @@ class DebugPreferencesDao(private val context: Context) {
 
     private val allLessonsCompletedKey = booleanPreferencesKey("all_lessons_completed")
     private val showDebugLessonControlsKey = booleanPreferencesKey("show_debug_lesson_controls")
+    private val shouldAutoPauseKey = booleanPreferencesKey("should_auto_pause")
 
-    val allLessonsCompleted: StateFlow<Boolean> = getBooleanStateFlow(allLessonsCompletedKey)
-    val showDebugLessonControls: StateFlow<Boolean> =
-        getBooleanStateFlow(showDebugLessonControlsKey)
+    val allLessonsCompleted = getBooleanStateFlow(allLessonsCompletedKey, false)
+    val showDebugLessonControls = getBooleanStateFlow(showDebugLessonControlsKey, false)
+    val shouldAutoPause = getBooleanStateFlow(shouldAutoPauseKey, true)
 
     fun setAllLessonsCompleted(value: Boolean) {
         setBoolean(allLessonsCompletedKey, value)
@@ -33,9 +33,14 @@ class DebugPreferencesDao(private val context: Context) {
         setBoolean(showDebugLessonControlsKey, value)
     }
 
-    private fun getBooleanStateFlow(key: Preferences.Key<Boolean>) = context.dataStore.data
-        .map { it[key] ?: false }
-        .stateIn(scope, started = SharingStarted.WhileSubscribed(5000), initialValue = false)
+    fun setShouldAutoPause(value: Boolean) {
+        setBoolean(shouldAutoPauseKey, value)
+    }
+
+    private fun getBooleanStateFlow(key: Preferences.Key<Boolean>, default: Boolean) =
+        context.dataStore.data
+            .map { it[key] ?: default }
+            .stateIn(scope, started = SharingStarted.WhileSubscribed(5000), initialValue = default)
 
     private fun setBoolean(key: Preferences.Key<Boolean>, value: Boolean) {
         scope.launch {

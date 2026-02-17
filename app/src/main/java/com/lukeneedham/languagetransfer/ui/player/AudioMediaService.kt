@@ -12,7 +12,6 @@ import androidx.media3.session.MediaSessionService
 import com.lukeneedham.languagetransfer.R
 import com.lukeneedham.languagetransfer.data.repository.AudioLessonRepository
 import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
-import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffectPlayer
 import com.lukeneedham.languagetransfer.util.AppResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,20 +24,14 @@ import org.koin.android.ext.android.inject
 
 class AudioMediaService : MediaSessionService() {
 
-    private val soundEffectPlayer = SoundEffectPlayer
-
     private var player: ExoPlayer? = null
     private var mediaSession: MediaSession? = null
-
-    private val pausepointHandler = PausepointHandler(soundEffectPlayer) {
-        lastPauseReason = PlayingState.Paused.Reason.Auto
-        player?.pause()
-    }
 
     // DI
     private val audioLessonRepository: AudioLessonRepository by inject()
     private val lessonPausepointProviderFactory: LessonPausepointProvider.Factory by inject()
     private val playbackRepository: PlaybackRepository by inject()
+    private val pausepointHandler: PausepointHandler by inject()
 
     // Scope for collecting pausepoints and checking progress
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -50,6 +43,12 @@ class AudioMediaService : MediaSessionService() {
 
     override fun onCreate() {
         super.onCreate()
+
+        pausepointHandler.onPausepointHitListener = {
+            lastPauseReason = PlayingState.Paused.Reason.Auto
+            player?.pause()
+        }
+
         val p = ExoPlayer.Builder(this).build().apply {
             // Configure sensible audio attributes so playback respects device settings
             setAudioAttributes(

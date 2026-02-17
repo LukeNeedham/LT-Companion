@@ -1,19 +1,21 @@
 package com.lukeneedham.languagetransfer.ui.player
 
-import androidx.media3.common.Player
 import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffect
 import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffectPlayer
+import com.lukeneedham.languagetransfer.util.DebugOptions
 import com.lukeneedham.languagetransfer.util.model.Millis
 
 class PausepointHandler(
     private val soundEffectPlayer: SoundEffectPlayer,
-    private val onPausepointHit: () -> Unit,
+    private val debugOptions: DebugOptions,
 ) {
     var pausepoints: List<Millis> = emptyList()
         set(value) {
             field = value
             handledPausepoints.clear()
         }
+
+    var onPausepointHitListener: () -> Unit = {}
 
     private val triggerPausepoints: List<Millis>
         get() = pausepoints.map { (it - pausepointTriggerOffset).coerceAtLeast(0) }
@@ -33,13 +35,17 @@ class PausepointHandler(
         if (nextPausepoint in handledPausepoints) return
 
         handledPausepoints.add(nextPausepoint)
-
-        soundEffectPlayer.play(SoundEffect.Thump, volume = 0.1f)
-        onPausepointHit()
+        autoPause()
     }
 
     fun clearHandledPausepoints() {
         handledPausepoints.clear()
+    }
+
+    private fun autoPause() {
+        if (!debugOptions.shouldAutoPause.value) return
+        soundEffectPlayer.play(SoundEffect.Thump, volume = 0.1f)
+        onPausepointHitListener()
     }
 
     private companion object {

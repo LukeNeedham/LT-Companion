@@ -231,4 +231,13 @@ private fun SettingsSection(
             viewModel.setShowDebugLessonControls(it)
         },
     )
+
+    val autoPause by viewModel.shouldAutoPause.collectAsState()
+    Setting(
+        text = "Auto-pause",
+        checked = autoPause,
+        onCheckedChange = {
+            viewModel.setShouldAutoPause(it)
+        },
+    )
 }

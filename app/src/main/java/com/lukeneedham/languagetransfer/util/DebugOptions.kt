@@ -9,6 +9,7 @@ class DebugOptions(
 ) {
     val allLessonsCompleted: StateFlow<Boolean> = debugPreferencesDao.allLessonsCompleted
     val showDebugLessonControls: StateFlow<Boolean> = debugPreferencesDao.showDebugLessonControls
+    val shouldAutoPause: StateFlow<Boolean> = debugPreferencesDao.shouldAutoPause
 
     fun setAllLessonsCompleted(value: Boolean) {
         debugPreferencesDao.setAllLessonsCompleted(value)
@@ -16,5 +17,9 @@ class DebugOptions(
 
     fun setShowDebugLessonControls(value: Boolean) {
         debugPreferencesDao.setShowDebugLessonControls(value)
+    }
+
+    fun setShouldAutoPause(value: Boolean) {
+        debugPreferencesDao.setShouldAutoPause(value)
     }
 }
