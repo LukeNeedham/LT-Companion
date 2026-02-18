@@ -17,24 +17,24 @@ import com.lukeneedham.languagetransfer.ui.player.PlayingState
 
 @Composable
 fun LessonPlayButton(
-    togglePlayPause: () -> Unit,
-    state: PlayingState,
+    onClick: () -> Unit,
+    isPaused: Boolean,
 ) {
     val image = AnimatedImageVector.animatedVectorResource(R.drawable.avd_play_pause)
 
     /** Our AVD is built such that start state is play icon, end state is pause icon */
-    val atEnd = state is PlayingState.Paused
+    val atEnd = isPaused
     val imagePainter = rememberAnimatedVectorPainter(image, atEnd)
 
     CutOutGlassyButton(
         painter = imagePainter,
-        contentDescription = when (state) {
-            is PlayingState.Playing -> "Pause"
-            is PlayingState.Paused -> "Play"
+        contentDescription = when (isPaused) {
+            false -> "Pause"
+            true -> "Play"
         },
         modifier = Modifier
             .fillMaxSize()
-            .clickable { togglePlayPause() }
+            .clickable { onClick() }
     )
 }
 
@@ -45,8 +45,8 @@ internal fun PreviewLessonPlayButton() {
         modifier = Modifier.background(color = Color.Red)
     ) {
         LessonPlayButton(
-            togglePlayPause = {},
-            state = PlayingState.Playing,
+            onClick = {},
+            isPaused = false,
         )
     }
 }

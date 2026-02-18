@@ -42,7 +42,7 @@ fun LessonHeader(
             // Create a separate layer for blending to work within, so we can use cut-outs
             .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
             .fillMaxWidth()
-            .padding(10.dp)
+            .padding(30.dp)
             .background(
                 color = Colors.glassy,
                 shape = RoundedCornerShape(20.dp),

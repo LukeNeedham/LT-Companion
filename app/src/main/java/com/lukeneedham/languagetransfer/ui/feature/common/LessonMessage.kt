@@ -26,7 +26,7 @@ fun LessonMessage(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
-            .padding(horizontal = 25.dp)
+            .padding(horizontal = 40.dp)
             .fillMaxWidth()
             .background(color = Colors.glassy, shape = RoundedCornerShape(20.dp))
             .padding(20.dp)

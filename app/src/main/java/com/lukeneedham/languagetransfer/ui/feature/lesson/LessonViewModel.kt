@@ -10,6 +10,9 @@ import com.lukeneedham.languagetransfer.ui.feature.lesson.pausepointreport.Pause
 import com.lukeneedham.languagetransfer.util.EventChannel
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
 /**
@@ -21,6 +24,8 @@ class LessonViewModel(
     private val initialLesson: CourseLesson,
     private val lessonSpecificViewModelFactory: LessonSpecificViewModelFactory,
 ) : ViewModel() {
+
+    private var specificVmCollectorsJob: Job? = null
 
     private val onBackMutable = EventChannel()
     val onBack = onBackMutable.flow
@@ -92,23 +97,31 @@ class LessonViewModel(
          * New child coroutine scope that gets ended when the lesson changes
          * and the lesson-specific VM gets disposed
          */
-        val childScope =
-            CoroutineScope(viewModelScope.coroutineContext + CoroutineName(childScopeName))
+        val childScope = CoroutineScope(
+            viewModelScope.coroutineContext +
+                    // Need to ensure the child has a new job independent of the parent job
+                    SupervisorJob(viewModelScope.coroutineContext.job) +
+                    CoroutineName(childScopeName)
+        )
 
         val vm = lessonSpecificViewModelFactory.create(lesson, childScope)
-        childScope.launch {
-            vm.onBack.collect {
-                onBack()
+
+        specificVmCollectorsJob?.cancel()
+        specificVmCollectorsJob = viewModelScope.launch {
+            launch {
+                vm.onBack.collect {
+                    onBack()
+                }
             }
-        }
-        childScope.launch {
-            vm.continueToNextLesson.collect {
-                continueToNextLesson()
+            launch {
+                vm.continueToNextLesson.collect {
+                    continueToNextLesson()
+                }
             }
-        }
-        childScope.launch {
-            vm.uiState.collect {
-                uiState = it
+            launch {
+                vm.uiState.collect {
+                    uiState = it
+                }
             }
         }
         return vm

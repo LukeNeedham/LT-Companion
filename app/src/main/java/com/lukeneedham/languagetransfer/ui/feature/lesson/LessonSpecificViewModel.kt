@@ -1,6 +1,5 @@
 package com.lukeneedham.languagetransfer.ui.feature.lesson
 
-import android.os.Build
 import androidx.core.net.toUri
 import com.lukeneedham.languagetransfer.data.repository.AudioLessonRepository
 import com.lukeneedham.languagetransfer.data.repository.CompletedLessonRepository
@@ -62,6 +61,7 @@ class LessonSpecificViewModel(
     val uiState = uiStateMutable.asStateFlow()
 
     init {
+        refreshUiState()
         coroutineScope.launch {
             debugOptions.showDebugLessonControls.collect {
                 showDebugLessonControls = it
@@ -202,8 +202,6 @@ class LessonSpecificViewModel(
     }
 
     fun togglePlaybackSpeed() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
-
         currentSpeedIndex = (currentSpeedIndex + 1) % possibleSpeeds.size
         val playbackSpeed = possibleSpeeds[currentSpeedIndex]
         audioPlayer.setPlaybackSpeed(playbackSpeed)

@@ -19,22 +19,17 @@ fun LessonPageMainButton(
 ) {
     when (state) {
         is LessonState.Loading -> {
-            LessonPlayButton(togglePlayPause = {}, state = PlayingState.Playing)
+            LessonPlayButton(onClick = {}, isPaused = false)
         }
 
         is LessonState.InProgress -> {
-            LessonPlayButton(togglePlayPause = onClick, state = state.playingState)
+            val isPaused = state.playingState is PlayingState.Paused
+            LessonPlayButton(onClick = onClick, isPaused = isPaused)
         }
 
         is LessonState.Completed -> {
             if (!state.hasCompletedCourse) {
-                CutOutGlassyButton(
-                    painter = painterResource(R.drawable.ic_play),
-                    contentDescription = "Continue",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable { onClick() }
-                )
+                LessonPlayButton(onClick = onClick, isPaused = true)
             } else {
                 CutOutGlassyButton(
                     painter = painterResource(R.drawable.ic_tick),

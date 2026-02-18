@@ -36,7 +36,6 @@ fun LessonScaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .systemBarsPadding()
-                .padding(horizontal = 20.dp)
         ) {
             Spacer(modifier = Modifier.height(10.dp))
 
