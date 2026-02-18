@@ -13,8 +13,8 @@ import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepoint
 import com.lukeneedham.languagetransfer.ui.feature.debug.DebugViewModel
 import com.lukeneedham.languagetransfer.ui.feature.downloadlanguage.DownloadLanguageViewModel
 import com.lukeneedham.languagetransfer.ui.feature.home.HomeViewModel
+import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonSpecificViewModelFactory
 import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonViewModel
-import com.lukeneedham.languagetransfer.ui.feature.lessoncompleted.LessonCompletedViewModel
 import com.lukeneedham.languagetransfer.ui.feature.startup.StartupViewModel
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
 import com.lukeneedham.languagetransfer.ui.player.MediaControllerProvider
@@ -107,16 +107,18 @@ object KoinModules {
             viewModel { HomeViewModel(get(), get(), get()) }
             viewModel { (lesson: CourseLesson) ->
                 LessonViewModel(
-                    lesson = lesson,
+                    initialLesson = lesson,
+                    lessonSpecificViewModelFactory = get(),
+                )
+            }
+
+            // VM factory for 'fake' VMs
+            factory {
+                LessonSpecificViewModelFactory(
                     completedLessonRepository = get(),
                     debugOptions = get(),
                     lessonPausepointProviderFactory = get(),
                     audioPlayerProvider = get(),
-                )
-            }
-            viewModel { (lesson: CourseLesson) ->
-                LessonCompletedViewModel(
-                    currentLesson = lesson,
                     audioLessonRepository = get(),
                     soundEffectPlayer = get(),
                     playbackRepository = get(),

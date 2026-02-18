@@ -13,7 +13,6 @@ import com.lukeneedham.languagetransfer.ui.feature.debug.DebugPage
 import com.lukeneedham.languagetransfer.ui.feature.downloadlanguage.DownloadLanguagePage
 import com.lukeneedham.languagetransfer.ui.feature.home.HomePage
 import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonPage
-import com.lukeneedham.languagetransfer.ui.feature.lessoncompleted.LessonCompletedPage
 import com.lukeneedham.languagetransfer.ui.feature.startup.StartupPage
 import com.lukeneedham.languagetransfer.ui.theme.Colors
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
@@ -102,24 +101,7 @@ fun Router() {
                     val lesson = page.lesson
                     LessonPage(
                         lesson = lesson,
-                        onBack = onBack,
-                        onLessonCompleted = {
-                            navController.popUpTo { it is Page.Home }
-                            navController.navigate(Page.LessonCompleted(lesson))
-                        }
-                    )
-                }
-
-                is Page.LessonCompleted -> {
-                    LessonCompletedPage(
-                        lesson = page.lesson,
-                        onReturnToHome = {
-                            navController.popUpTo { it is Page.Home }
-                        },
-                        onContinueToNextLesson = { nextLesson ->
-                            navController.popUpTo { it is Page.Home }
-                            navController.navigate(Page.Lesson(nextLesson))
-                        }
+                        goBack = onBack,
                     )
                 }
 
@@ -129,12 +111,7 @@ fun Router() {
                         openStartup = { navController.navigate(Page.Startup) },
                         openCourseDownload = { navController.navigate(Page.CourseDownload) },
                         openHome = { navController.navigate(Page.Home) },
-                        openLesson = { lesson -> navController.navigate(Page.Lesson(lesson)) },
-                        openLessonCompleted = { lesson ->
-                            navController.navigate(
-                                Page.LessonCompleted(lesson)
-                            )
-                        }
+                        openLesson = { lesson -> navController.navigate(Page.Lesson(lesson)) }
                     )
                 }
             }

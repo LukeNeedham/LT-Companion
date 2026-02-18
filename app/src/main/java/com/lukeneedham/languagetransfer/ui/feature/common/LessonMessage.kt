@@ -21,10 +21,11 @@ import com.lukeneedham.languagetransfer.ui.theme.Colors
 fun LessonMessage(
     title: String,
     message: String,
+    modifier: Modifier = Modifier
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
+        modifier = modifier
             .padding(horizontal = 25.dp)
             .fillMaxWidth()
             .background(color = Colors.glassy, shape = RoundedCornerShape(20.dp))

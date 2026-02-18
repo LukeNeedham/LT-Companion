@@ -10,21 +10,55 @@ import com.lukeneedham.languagetransfer.ui.player.PlayingState
 fun LessonPageAboveButtonContent(
     state: LessonState,
 ) {
-    val inProgressState = state as? LessonState.InProgress ?: return
-    val playingState = inProgressState.playingState
-    val isAutoPaused = when (playingState) {
-        is PlayingState.Paused -> when (playingState.reason) {
-            PlayingState.Paused.Reason.Manual -> false
-            PlayingState.Paused.Reason.Auto -> true
+    val message = when (state) {
+        is LessonState.InProgress -> {
+            val playingState = state.playingState
+            when (playingState) {
+                is PlayingState.Paused -> when (playingState.reason) {
+                    PlayingState.Paused.Reason.Manual -> null
+                    PlayingState.Paused.Reason.Auto -> Message(
+                        title = "Auto paused",
+                        message = "Think for yourself before resuming",
+                    )
+                }
+
+                is PlayingState.Playing -> null
+            }
         }
 
-        is PlayingState.Playing -> false
+        is LessonState.Completed -> {
+            if (state.hasCompletedCourse) {
+                Message(
+                    title = "Course completed!",
+                    message = "Congratulations - you're done!",
+                )
+            } else {
+                Message(
+                    title = "Lesson completed!",
+                    message = "Ready for the next one?",
+                )
+            }
+        }
+
+        is LessonState.Error -> {
+            Message(
+                title = "Something went wrong",
+                message = state.message,
+            )
+        }
+
+        LessonState.Loading -> null
     }
 
-    if (isAutoPaused) {
+    if (message != null) {
         LessonMessage(
-            title = "Auto paused",
-            message = "Think for yourself before resuming",
+            title = message.title,
+            message = message.message,
         )
     }
 }
+
+private data class Message(
+    val title: String,
+    val message: String,
+)

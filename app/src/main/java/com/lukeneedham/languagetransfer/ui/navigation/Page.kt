@@ -27,11 +27,6 @@ sealed interface Page : Parcelable {
     data class Lesson(val lesson: CourseLesson) : Page
 
     /**
-     * The lesson completed page shown after a user finishes a lesson.
-     */
-    data class LessonCompleted(val lesson: CourseLesson) : Page
-
-    /**
      * The debug page for navigating to any other page.
      */
     object Debug : Page

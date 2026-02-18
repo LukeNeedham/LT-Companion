@@ -25,4 +25,11 @@ sealed interface LessonState {
      * State when an error occurs during playback.
      */
     data class Error(val message: String) : LessonState
+
+    /**
+     * State when a lesson is completed.
+     */
+    data class Completed(
+        val hasCompletedCourse: Boolean,
+    ) : LessonState
 }

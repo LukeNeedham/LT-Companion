@@ -49,7 +49,6 @@ fun DebugPage(
     openCourseDownload: () -> Unit,
     openHome: () -> Unit,
     openLesson: (lesson: CourseLesson) -> Unit,
-    openLessonCompleted: (lesson: CourseLesson) -> Unit,
     viewModel: DebugViewModel = koinViewModel()
 ) {
     val clipboardManager = LocalClipboardManager.current
@@ -121,7 +120,6 @@ fun DebugPage(
                 openHome = openHome,
                 openLesson = openLesson,
                 dummyLesson = dummyLesson,
-                openLessonCompleted = openLessonCompleted,
             )
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -168,7 +166,6 @@ private fun NavigateSection(
     openHome: () -> Unit,
     openLesson: (lesson: CourseLesson) -> Unit,
     dummyLesson: CourseLesson,
-    openLessonCompleted: (lesson: CourseLesson) -> Unit
 ) {
     @Composable
     fun OpenPageButton(text: String, onClick: () -> Unit) {
@@ -182,10 +179,6 @@ private fun NavigateSection(
     OpenPageButton(onClick = openCourseDownload, text = "Course Download")
     OpenPageButton(onClick = openHome, text = "Home")
     OpenPageButton(onClick = { openLesson(dummyLesson) }, text = "Lesson")
-    OpenPageButton(
-        onClick = { openLessonCompleted(dummyLesson) },
-        text = "Lesson Completed"
-    )
 }
 
 @Composable

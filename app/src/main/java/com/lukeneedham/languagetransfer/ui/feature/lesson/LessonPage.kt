@@ -12,32 +12,30 @@ import org.koin.core.parameter.parametersOf
  * Lesson page where users can play and interact with a specific lesson.
  *
  * @param lesson The audio lesson to play
- * @param onBack Callback to be invoked when the user wants to go back
- * @param onLessonCompleted Callback to be invoked when the lesson is completed
+ * @param goBack Callback to be invoked when the user wants to go back
  * @param viewModel The view model for this page
  */
 @Composable
 fun LessonPage(
     lesson: CourseLesson,
-    onBack: () -> Unit,
-    onLessonCompleted: () -> Unit,
+    goBack: () -> Unit,
     viewModel: LessonViewModel = koinViewModel { parametersOf(lesson) },
 ) {
     SystemBarsColor(useDarkIcons = false)
     WakeLock()
 
-    val onCompletedFlow = viewModel.onCompleted
-    LaunchedEffect(onCompletedFlow) {
-        onCompletedFlow.collect {
-            onLessonCompleted()
+    val onBackFlow = viewModel.onBack
+    LaunchedEffect(onBackFlow) {
+        onBackFlow.collect {
+            goBack()
         }
     }
 
     LessonPageContent(
         lesson = lesson,
         uiState = viewModel.uiState,
-        onBack = onBack,
-        togglePlayPause = viewModel::togglePlayPause,
+        onBack = viewModel::onBack,
+        onMainButtonClick = viewModel::onMainButtonClick,
         skipBackward = viewModel::skipBackward,
         togglePlaybackSpeed = viewModel::togglePlaybackSpeed,
         skipToEnd = viewModel::skipToEnd,

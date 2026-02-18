@@ -15,7 +15,7 @@ fun LessonPageContent(
     lesson: CourseLesson,
     uiState: LessonState,
     onBack: () -> Unit,
-    togglePlayPause: () -> Unit,
+    onMainButtonClick: () -> Unit,
     skipBackward: () -> Unit,
     togglePlaybackSpeed: () -> Unit,
     skipToEnd: () -> Unit,
@@ -34,7 +34,7 @@ fun LessonPageContent(
         mainButton = {
             LessonPageMainButton(
                 state = uiState,
-                togglePlayPause = togglePlayPause,
+                onClick = onMainButtonClick,
             )
         },
         belowButtonContent = {
@@ -57,7 +57,7 @@ private fun Preview() {
         lesson = MockDataLesson.lesson,
         uiState = MockDataLesson.state,
         onBack = {},
-        togglePlayPause = {},
+        onMainButtonClick = {},
         skipBackward = {},
         togglePlaybackSpeed = {},
         skipToEnd = {},
