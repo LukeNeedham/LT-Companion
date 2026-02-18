@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lukeneedham.languagetransfer.data.repository.AudioLessonRepository
 import com.lukeneedham.languagetransfer.data.repository.CompletedLessonRepository
-import com.lukeneedham.languagetransfer.ui.feature.home.model.LessonProgress
+import com.lukeneedham.languagetransfer.ui.feature.home.model.HomeLessonItem
 import com.lukeneedham.languagetransfer.util.AppResult
 import com.lukeneedham.languagetransfer.util.DebugOptions
 import com.lukeneedham.languagetransfer.util.EventDataChannel
@@ -24,6 +24,7 @@ class HomeViewModel(
     private val debugOptions: DebugOptions,
 ) : ViewModel() {
     private var completedLessonNumbers: List<Int>? = null
+    private var mostRecentCompletedLessonNumber: Int? = null
     private var debugAllLessonsCompleted: Boolean = false
     private val courseResult = audioLessonRepository.getLanguageCourse()
 
@@ -35,6 +36,7 @@ class HomeViewModel(
 
     init {
         observeCompletedLessons()
+        observeMostRecentCompletedLesson()
         viewModelScope.launch {
             debugOptions.allLessonsCompleted.collect {
                 debugAllLessonsCompleted = it
@@ -50,7 +52,7 @@ class HomeViewModel(
 
         if (newState is HomeState.Success && oldState !is HomeState.Success) {
             val currentLessonIndex =
-                newState.lessons.indexOfFirst { it.progress == LessonProgress.Progress.Current }
+                newState.lessons.indexOfFirst { it.progress == HomeLessonItem.Progress.Current }
             val scrollTo = if (currentLessonIndex == -1) 0 else currentLessonIndex
             _scrollToLessonFlow.tryEmit(scrollTo)
         }
@@ -68,26 +70,33 @@ class HomeViewModel(
 
             is AppResult.Success -> {
                 val course = courseRes.value
+
+                val lastCompletedNum = mostRecentCompletedLessonNumber
+                val lessonNumWithBookmark = if (lastCompletedNum == null) null else lastCompletedNum + 1
+
                 val lessons = course.lessons.map { lesson ->
                     val lessonNumber = lesson.lessonNumber
                     val previousLessonNumber = lessonNumber - 1
                     val progress = when {
-                        debugAllLessonsCompleted -> LessonProgress.Progress.Completed
+                        debugAllLessonsCompleted -> HomeLessonItem.Progress.Completed
 
                         lessonNumber in completed ->
-                            LessonProgress.Progress.Completed
+                            HomeLessonItem.Progress.Completed
 
                         previousLessonNumber in completed ||
                                 // When the current lesson is the first lesson
                                 // there won't be any completed lessons
-                                previousLessonNumber == 0 -> LessonProgress.Progress.Current
+                                previousLessonNumber == 0 -> HomeLessonItem.Progress.Current
 
-                        else -> LessonProgress.Progress.Locked
+                        else -> HomeLessonItem.Progress.Locked
                     }
 
-                    LessonProgress(
+                    /** This item has a bookmark when the previous lesson is the last completed lesson */
+                    val hasBookmark = lessonNumber == lessonNumWithBookmark
+                    HomeLessonItem(
                         lesson = lesson,
                         progress = progress,
+                        hasBookmark = hasBookmark,
                     )
                 }
 
@@ -100,6 +109,15 @@ class HomeViewModel(
         viewModelScope.launch {
             completedLessonRepository.getAllCompletedLessonsFlow().collect {
                 completedLessonNumbers = it.map { it.lessonId }
+                refreshUiState()
+            }
+        }
+    }
+
+    fun observeMostRecentCompletedLesson() {
+        viewModelScope.launch {
+            completedLessonRepository.getMostRecentCompletedLessonFlow().collect {
+                mostRecentCompletedLessonNumber = it.lessonId
                 refreshUiState()
             }
         }

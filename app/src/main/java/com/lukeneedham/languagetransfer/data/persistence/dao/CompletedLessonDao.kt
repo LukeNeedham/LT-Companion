@@ -74,6 +74,9 @@ interface CompletedLessonDao {
     @Query("SELECT * FROM completed_lessons")
     fun getAllCompletedLessonsFlow(): Flow<List<CompletedLessonEntity>>
 
+    @Query("SELECT * FROM completed_lessons ORDER BY completedAtMillis DESC LIMIT 1")
+    fun getMostRecentCompletedLessonFlow(): Flow<CompletedLessonEntity>
+
     /**
      * Check if a lesson is completed.
      *

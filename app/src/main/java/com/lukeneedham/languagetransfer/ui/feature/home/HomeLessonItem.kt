@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,43 +18,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lukeneedham.languagetransfer.ui.feature.home.model.LessonProgress
+import com.lukeneedham.languagetransfer.ui.feature.home.model.HomeLessonItem
 import com.lukeneedham.languagetransfer.ui.theme.Colors
 import com.lukeneedham.languagetransfer.ui.util.DurationFormatter
 import com.lukeneedham.languagetransfer.ui.util.color.ext.toComposeColors
 
 @Composable
 fun LessonItem(
-    lessonProgress: LessonProgress,
+    lessonItem: HomeLessonItem,
     onClick: () -> Unit,
 ) {
-    val lesson = lessonProgress.lesson
-    val progress = lessonProgress.progress
+    val lesson = lessonItem.lesson
+    val progress = lessonItem.progress
     val lessonColors = lesson.colorScheme.toComposeColors()
 
     val backgroundMod = when (progress) {
-        LessonProgress.Progress.Completed,
-        LessonProgress.Progress.Locked -> Modifier.background(color = Colors.glassy)
+        HomeLessonItem.Progress.Completed,
+        HomeLessonItem.Progress.Locked -> Modifier.background(color = Colors.glassy)
 
-        LessonProgress.Progress.Current -> Modifier.background(
+        HomeLessonItem.Progress.Current -> Modifier.background(
             brush = Brush.linearGradient(lessonColors)
         )
     }
 
     val verticalPadding = when (progress) {
-        LessonProgress.Progress.Locked,
-        LessonProgress.Progress.Completed -> 20.dp
+        HomeLessonItem.Progress.Locked,
+        HomeLessonItem.Progress.Completed -> 20.dp
 
-        LessonProgress.Progress.Current -> 30.dp
+        HomeLessonItem.Progress.Current -> 30.dp
     }
 
     val textColor = when (progress) {
-        LessonProgress.Progress.Locked,
-        LessonProgress.Progress.Completed -> Color.Black
+        HomeLessonItem.Progress.Locked,
+        HomeLessonItem.Progress.Completed -> Color.Black
 
-        LessonProgress.Progress.Current -> Color.White
+        HomeLessonItem.Progress.Current -> Color.White
     }
 
     Row(
@@ -63,9 +65,12 @@ fun LessonItem(
             .clip(RoundedCornerShape(20.dp))
             .then(backgroundMod)
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = verticalPadding)
+            .padding(horizontal = 16.dp)
     ) {
-        Column {
+        Column(
+            modifier = Modifier
+                .padding(vertical = verticalPadding)
+        ) {
             Text(
                 text = "Lesson ${lesson.lessonNumber}",
                 fontSize = 20.sp,
@@ -84,25 +89,34 @@ fun LessonItem(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        val isChecked = when (progress) {
-            LessonProgress.Progress.Locked,
-            LessonProgress.Progress.Current -> false
+        if(lessonItem.hasBookmark) {
+            BookmarkIcon(
+                modifier = Modifier
+                    .align(Alignment.Top)
+            )
+        }
 
-            LessonProgress.Progress.Completed -> true
+        Spacer(modifier = Modifier.width(20.dp))
+
+        val isChecked = when (progress) {
+            HomeLessonItem.Progress.Locked,
+            HomeLessonItem.Progress.Current -> false
+
+            HomeLessonItem.Progress.Completed -> true
         }
 
         val colors = when (progress) {
-            LessonProgress.Progress.Locked -> {
+            HomeLessonItem.Progress.Locked -> {
                 val color = Color.LightGray
                 listOf(color, color)
             }
 
-            LessonProgress.Progress.Current -> {
+            HomeLessonItem.Progress.Current -> {
                 val color = Color.White
                 listOf(color, color)
             }
 
-            LessonProgress.Progress.Completed -> lesson.colorScheme.toComposeColors()
+            HomeLessonItem.Progress.Completed -> lesson.colorScheme.toComposeColors()
         }
         GradientCheckBox(
             isChecked = isChecked,

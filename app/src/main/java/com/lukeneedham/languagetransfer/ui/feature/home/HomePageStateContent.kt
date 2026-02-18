@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
-import com.lukeneedham.languagetransfer.ui.feature.home.model.LessonProgress
+import com.lukeneedham.languagetransfer.ui.feature.home.model.HomeLessonItem
 
 @Composable
 fun HomePageStateContent(
@@ -47,17 +47,17 @@ fun HomePageStateContent(
                     .fillMaxSize()
                     .padding(horizontal = 16.dp)
             ) {
-                items(lessons) { lessonProgress ->
+                items(lessons) { lessonItem ->
                     LessonItem(
-                        lessonProgress = lessonProgress,
+                        lessonItem = lessonItem,
                         onClick = {
-                            when (lessonProgress.progress) {
-                                LessonProgress.Progress.Completed,
-                                LessonProgress.Progress.Current -> {
-                                    onLessonClick(lessonProgress.lesson)
+                            when (lessonItem.progress) {
+                                HomeLessonItem.Progress.Completed,
+                                HomeLessonItem.Progress.Current -> {
+                                    onLessonClick(lessonItem.lesson)
                                 }
 
-                                LessonProgress.Progress.Locked -> {
+                                HomeLessonItem.Progress.Locked -> {
                                     // Do nothing - this lesson is locked
                                 }
                             }
