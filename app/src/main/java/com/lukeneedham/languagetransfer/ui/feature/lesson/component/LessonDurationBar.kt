@@ -1,6 +1,5 @@
 package com.lukeneedham.languagetransfer.ui.feature.lesson.component
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,10 +28,15 @@ fun LessonDurationBar(
     pausepointFractions: List<Float>,
     modifier: Modifier = Modifier
 ) {
+    fun getProgressFraction(): Float {
+        if (duration == 0L) return 0f
+        return currentPosition.toFloat() / duration.toFloat()
+    }
+
+    val progressFraction = getProgressFraction()
+
     val color = Colors.glassy
     Column(modifier = modifier) {
-        val progressFraction = currentPosition.toFloat() / duration.toFloat()
-
         LessonProgressBar(
             progressFraction = progressFraction,
             pausepointFractions = pausepointFractions,
