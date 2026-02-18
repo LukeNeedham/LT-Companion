@@ -14,6 +14,7 @@ import com.lukeneedham.languagetransfer.ui.util.color.ext.toComposeColors
 fun LessonPageContent(
     lesson: CourseLesson,
     uiState: LessonState,
+    showDebugLessonControls: Boolean,
     onBack: () -> Unit,
     onMainButtonClick: () -> Unit,
     skipBackward: () -> Unit,
@@ -45,6 +46,7 @@ fun LessonPageContent(
                 skipToEnd = skipToEnd,
                 jumpForward = jumpForward,
                 pausepointReporter = pausepointReporter,
+                showDebugLessonControls = showDebugLessonControls,
             )
         }
     )
@@ -63,5 +65,6 @@ private fun Preview() {
         skipToEnd = {},
         jumpForward = {},
         pausepointReporter = MockDataLesson.pausepointReporter,
+        showDebugLessonControls = false,
     )
 }

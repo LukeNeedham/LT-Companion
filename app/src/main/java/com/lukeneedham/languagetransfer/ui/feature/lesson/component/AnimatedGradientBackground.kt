@@ -1,5 +1,7 @@
 package com.lukeneedham.languagetransfer.ui.feature.lesson.component
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -39,6 +42,15 @@ fun AnimatedGradientBackground(
         ) {
             content()
         }
+    }
+
+    // Animate each color in the list when colors param changes
+    val animatedColors = colors.map { targetColor ->
+        animateColorAsState(
+            targetValue = targetColor,
+            animationSpec = tween(durationMillis = 1000),
+            label = "colorAnimation"
+        ).value
     }
 
     // Create infinite transitions for the animation
@@ -79,7 +91,7 @@ fun AnimatedGradientBackground(
 
     // Create the gradient brush with animated properties
     val brush = Brush.radialGradient(
-        colors = colors,
+        colors = animatedColors,
         center = Offset(xPosition, yPosition),
         radius = size * 1000f,
         tileMode = TileMode.Mirror
@@ -89,7 +101,10 @@ fun AnimatedGradientBackground(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(brush)
+            // Optimization: drawBehind for frequently changing animations
+            .drawBehind {
+                drawRect(brush)
+            }
     ) {
         // Display the content on top of the animated background
         content()

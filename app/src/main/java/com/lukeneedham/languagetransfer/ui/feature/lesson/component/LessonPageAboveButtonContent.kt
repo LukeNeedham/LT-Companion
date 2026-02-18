@@ -2,6 +2,8 @@ package com.lukeneedham.languagetransfer.ui.feature.lesson.component
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
@@ -10,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntOffset.Companion
 import com.lukeneedham.languagetransfer.ui.feature.common.LessonMessage
 import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonState
 import com.lukeneedham.languagetransfer.ui.player.PlayingState
@@ -62,7 +65,7 @@ fun LessonPageAboveButtonContent(
     AnimatedContent(
         targetState = message,
         transitionSpec = {
-            val spec = tween<IntOffset>(durationMillis = 1000)
+            val spec = spring(visibilityThreshold = IntOffset.VisibilityThreshold)
             val entrance = slideIntoContainer(towards = SlideDirection.Left, animationSpec = spec)
             val exit = slideOutOfContainer(towards = SlideDirection.Left, animationSpec = spec)
             entrance.togetherWith(exit)

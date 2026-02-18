@@ -7,6 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
 import com.lukeneedham.languagetransfer.ui.feature.lesson.pausepointreport.PausepointReporter
+import com.lukeneedham.languagetransfer.ui.player.PlaybackRepository
+import com.lukeneedham.languagetransfer.ui.player.PlayingState
+import com.lukeneedham.languagetransfer.util.DebugOptions
 import com.lukeneedham.languagetransfer.util.EventChannel
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -23,6 +26,8 @@ import kotlinx.coroutines.launch
 class LessonViewModel(
     private val initialLesson: CourseLesson,
     private val lessonSpecificViewModelFactory: LessonSpecificViewModelFactory,
+    private val debugOptions: DebugOptions,
+    private val playbackRepository: PlaybackRepository,
 ) : ViewModel() {
 
     private var specificVmCollectorsJob: Job? = null
@@ -31,6 +36,12 @@ class LessonViewModel(
     val onBack = onBackMutable.flow
 
     var uiState by mutableStateOf<LessonState>(LessonState.Loading)
+        private set
+
+    var showDebugLessonControls by mutableStateOf(false)
+        private set
+
+    var lesson by mutableStateOf<CourseLesson>(initialLesson)
         private set
 
     val pausepointReporter = object : PausepointReporter {
@@ -52,6 +63,30 @@ class LessonViewModel(
     }
 
     private var specificLessonViewModel = createLessonSpecificViewModel(initialLesson)
+
+    init {
+        viewModelScope.launch {
+            debugOptions.showDebugLessonControls.collect {
+                showDebugLessonControls = it
+            }
+        }
+
+        viewModelScope.launch {
+            playbackRepository.resumeChannel.collect {
+                when (uiState) {
+                    is LessonState.Completed -> {
+                        continueToNextLesson()
+                    }
+
+                    is LessonState.Error,
+                    is LessonState.InProgress,
+                    LessonState.Loading -> {
+                        // Nothing to do
+                    }
+                }
+            }
+        }
+    }
 
     override fun onCleared() {
         super.onCleared()
@@ -75,7 +110,30 @@ class LessonViewModel(
     }
 
     fun onMainButtonClick() {
-        specificLessonViewModel.onMainButtonClick()
+        val state = uiState
+        when (state) {
+            is LessonState.Error,
+            LessonState.Loading -> {
+                // Ignore
+            }
+
+            is LessonState.InProgress -> {
+                // Toggle playback
+                when (state.playingState) {
+                    is PlayingState.Playing -> specificLessonViewModel.pausePlayback()
+                    is PlayingState.Paused -> specificLessonViewModel.resumePlayback()
+                }
+            }
+
+            is LessonState.Completed -> {
+                // Go to next lesson, or back to home if completed
+                if (state.hasCompletedCourse) {
+                    onBack()
+                } else {
+                    continueToNextLesson()
+                }
+            }
+        }
     }
 
     fun onBack() {
@@ -85,6 +143,7 @@ class LessonViewModel(
     fun continueToNextLesson() {
         val next = specificLessonViewModel.nextLesson ?: return
 
+        lesson = next
         // Dispose of the VM for the current lesson - perform clean-up
         specificLessonViewModel.dispose()
         specificLessonViewModel = createLessonSpecificViewModel(next)
@@ -108,16 +167,6 @@ class LessonViewModel(
 
         specificVmCollectorsJob?.cancel()
         specificVmCollectorsJob = viewModelScope.launch {
-            launch {
-                vm.onBack.collect {
-                    onBack()
-                }
-            }
-            launch {
-                vm.continueToNextLesson.collect {
-                    continueToNextLesson()
-                }
-            }
             launch {
                 vm.uiState.collect {
                     uiState = it

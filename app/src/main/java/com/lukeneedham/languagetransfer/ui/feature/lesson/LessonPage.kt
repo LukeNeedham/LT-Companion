@@ -10,16 +10,12 @@ import org.koin.core.parameter.parametersOf
 
 /**
  * Lesson page where users can play and interact with a specific lesson.
- *
- * @param lesson The audio lesson to play
- * @param goBack Callback to be invoked when the user wants to go back
- * @param viewModel The view model for this page
  */
 @Composable
 fun LessonPage(
-    lesson: CourseLesson,
+    initialLesson: CourseLesson,
     goBack: () -> Unit,
-    viewModel: LessonViewModel = koinViewModel { parametersOf(lesson) },
+    viewModel: LessonViewModel = koinViewModel { parametersOf(initialLesson) },
 ) {
     SystemBarsColor(useDarkIcons = false)
     WakeLock()
@@ -32,8 +28,9 @@ fun LessonPage(
     }
 
     LessonPageContent(
-        lesson = lesson,
+        lesson = viewModel.lesson,
         uiState = viewModel.uiState,
+        showDebugLessonControls = viewModel.showDebugLessonControls,
         onBack = viewModel::onBack,
         onMainButtonClick = viewModel::onMainButtonClick,
         skipBackward = viewModel::skipBackward,

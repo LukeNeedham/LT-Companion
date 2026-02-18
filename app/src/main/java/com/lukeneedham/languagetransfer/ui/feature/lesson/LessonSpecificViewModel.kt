@@ -28,12 +28,10 @@ class LessonSpecificViewModel(
     val lesson: CourseLesson,
     val coroutineScope: CoroutineScope,
     private val completedLessonRepository: CompletedLessonRepository,
-    private val debugOptions: DebugOptions,
     private val lessonPausepointProviderFactory: LessonPausepointProvider.Factory,
     private val audioPlayerProvider: AudioPlayerProvider,
     private val audioLessonRepository: AudioLessonRepository,
     private val soundEffectPlayer: SoundEffectPlayer,
-    private val playbackRepository: PlaybackRepository,
 ) {
     private val possibleSpeeds = listOf(1.0f, 1.7f)
 
@@ -43,16 +41,9 @@ class LessonSpecificViewModel(
 
     val nextLesson: CourseLesson? = calculateNextLesson()
 
-    private val onBackMutable = EventChannel()
-    val onBack = onBackMutable.flow
-
-    private val continueToNextLessonMutable = EventChannel()
-    val continueToNextLesson = continueToNextLessonMutable.flow
-
     /** Actual pausepoint values */
     private var pausepoints: List<Millis> = emptyList()
     private var currentSpeedIndex: Int = 0
-    private var showDebugLessonControls: Boolean = false
     private var playingState: PlayingState? = null
     private var isCompleted: Boolean = false
     private var error: String? = null
@@ -62,30 +53,11 @@ class LessonSpecificViewModel(
 
     init {
         refreshUiState()
-        coroutineScope.launch {
-            debugOptions.showDebugLessonControls.collect {
-                showDebugLessonControls = it
-            }
-        }
+
         coroutineScope.launch {
             lessonPausepointProvider.pausepoints.collect { pps ->
                 pausepoints = pps
                 refreshUiState()
-            }
-        }
-        coroutineScope.launch {
-            playbackRepository.resumeChannel.collect {
-                when (uiState.value) {
-                    is LessonState.Completed -> {
-                        continueToNextLessonMutable.send()
-                    }
-
-                    is LessonState.Error,
-                    is LessonState.InProgress,
-                    LessonState.Loading -> {
-                        // Nothing to do
-                    }
-                }
             }
         }
     }
@@ -93,33 +65,6 @@ class LessonSpecificViewModel(
     fun dispose() {
         audioPlayer.stop()
         coroutineScope.cancel("ViewModel disposed")
-    }
-
-    fun onMainButtonClick() {
-        val state = uiState.value
-        when (state) {
-            is LessonState.Error,
-            LessonState.Loading -> {
-                // Ignore
-            }
-
-            is LessonState.InProgress -> {
-                // Toggle playback
-                when (state.playingState) {
-                    is PlayingState.Playing -> pausePlayback()
-                    is PlayingState.Paused -> resumePlayback()
-                }
-            }
-
-            is LessonState.Completed -> {
-                // Go to next lesson, or back to home if completed
-                if (state.hasCompletedCourse) {
-                    onBackMutable.send()
-                } else {
-                    continueToNextLessonMutable.send()
-                }
-            }
-        }
     }
 
     private fun createAudioPlayer(): AudioPlayer {
@@ -130,6 +75,8 @@ class LessonSpecificViewModel(
                     delay(completedDelay)
                     completedLessonRepository.markLessonAsCompleted(lesson.lessonNumber)
                     isCompleted = true
+                    // Stop the audio player, remove the media notification
+                    audioPlayer.stop()
                     soundEffectPlayer.play(SoundEffect.Completed)
                     refreshUiState()
                 }
@@ -173,7 +120,6 @@ class LessonSpecificViewModel(
             playingState = playingState,
             pausepointFractions = getPausepointFractions(),
             playbackSpeed = getCurrentPlaybackSpeed(),
-            showDebugLessonControls = showDebugLessonControls,
         )
     }
 
@@ -251,14 +197,14 @@ class LessonSpecificViewModel(
     /**
      * Pauses the current playback.
      */
-    private fun pausePlayback() {
+    fun pausePlayback() {
         audioPlayer.pause()
     }
 
     /**
      * Resumes the paused playback.
      */
-    private fun resumePlayback() {
+    fun resumePlayback() {
         audioPlayer.play()
     }
 

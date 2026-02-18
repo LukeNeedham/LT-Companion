@@ -21,7 +21,6 @@ import dev.olshevski.navigation.reimagined.NavBackHandler
 import dev.olshevski.navigation.reimagined.navigate
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.popAll
-import dev.olshevski.navigation.reimagined.popUpTo
 import dev.olshevski.navigation.reimagined.rememberNavController
 
 @Composable
@@ -100,7 +99,7 @@ fun Router() {
                 is Page.Lesson -> {
                     val lesson = page.lesson
                     LessonPage(
-                        lesson = lesson,
+                        initialLesson = lesson,
                         goBack = onBack,
                     )
                 }

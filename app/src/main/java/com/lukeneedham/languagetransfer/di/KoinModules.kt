@@ -109,6 +109,8 @@ object KoinModules {
                 LessonViewModel(
                     initialLesson = lesson,
                     lessonSpecificViewModelFactory = get(),
+                    debugOptions = get(),
+                    playbackRepository = get(),
                 )
             }
 
@@ -116,7 +118,6 @@ object KoinModules {
             factory {
                 LessonSpecificViewModelFactory(
                     completedLessonRepository = get(),
-                    debugOptions = get(),
                     lessonPausepointProviderFactory = get(),
                     audioPlayerProvider = get(),
                     audioLessonRepository = get(),

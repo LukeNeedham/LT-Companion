@@ -26,7 +26,6 @@ object MockDataLesson {
         playingState = PlayingState.Playing,
         pausepointFractions = emptyList(),
         playbackSpeed = 1f,
-        showDebugLessonControls = false,
     )
 
     val pausepointReporter = object : PausepointReporter {

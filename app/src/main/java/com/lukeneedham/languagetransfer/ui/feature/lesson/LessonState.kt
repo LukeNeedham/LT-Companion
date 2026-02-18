@@ -18,7 +18,6 @@ sealed interface LessonState {
         val playingState: PlayingState,
         val pausepointFractions: List<Float>,
         val playbackSpeed: Float,
-        val showDebugLessonControls: Boolean,
     ) : LessonState
 
     /**
