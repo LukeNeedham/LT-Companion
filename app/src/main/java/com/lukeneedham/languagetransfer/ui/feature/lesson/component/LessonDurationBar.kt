@@ -1,6 +1,8 @@
 package com.lukeneedham.languagetransfer.ui.feature.lesson.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,6 +29,7 @@ fun LessonDurationBar(
     currentPosition: Millis,
     duration: Millis,
     pausepointFractions: List<Float>,
+    onSeek: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
     fun getProgressFraction(): Float {
@@ -37,11 +41,20 @@ fun LessonDurationBar(
 
     val color = Colors.glassy
     Column(modifier = modifier) {
-        LessonProgressBar(
-            progressFraction = progressFraction,
-            pausepointFractions = pausepointFractions,
-            trackColor = color,
-        )
+        Box(
+            modifier = Modifier.pointerInput(Unit) {
+                detectTapGestures { offset ->
+                    val fraction = offset.x / size.width
+                    onSeek(fraction.coerceIn(0f, 1f))
+                }
+            }
+        ) {
+            LessonProgressBar(
+                progressFraction = progressFraction,
+                pausepointFractions = pausepointFractions,
+                trackColor = color,
+            )
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -77,7 +90,10 @@ private fun Preview() {
         )
     ) {
         LessonDurationBar(
-            currentPosition = 10, duration = 300, pausepointFractions = listOf(0.4f, 0.7f, 0.9f),
+            currentPosition = 10,
+            duration = 300,
+            pausepointFractions = listOf(0.4f, 0.7f, 0.9f),
+            onSeek = {},
         )
     }
 }

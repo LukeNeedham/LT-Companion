@@ -108,6 +108,10 @@ class LessonViewModel(
     fun jumpForward() {
         specificLessonViewModel.jumpForward()
     }
+    
+    fun seekTo(fraction: Float) {
+        specificLessonViewModel.seekTo(fraction)
+    }
 
     fun onMainButtonClick() {
         val state = uiState

@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lukeneedham.languagetransfer.data.persistence.prefs.PrefsBooleanKey
 import com.lukeneedham.languagetransfer.data.repository.AudioLessonRepository
 import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
 import com.lukeneedham.languagetransfer.util.AppResult
@@ -19,10 +20,6 @@ class DebugViewModel(
     private val audioLessonRepository: AudioLessonRepository,
     private val lessonPausepointProviderFactory: LessonPausepointProvider.Factory,
 ) : ViewModel() {
-    val allLessonsCompleted = debugOptions.allLessonsCompleted
-    val showDebugLessonControls = debugOptions.showDebugLessonControls
-    val shouldAutoPause = debugOptions.shouldAutoPause
-
     var modifiedPausepointsJson by mutableStateOf("")
         private set
 
@@ -39,16 +36,10 @@ class DebugViewModel(
         }
     }
 
-    fun setAllLessonsCompleted(value: Boolean) {
-        debugOptions.setAllLessonsCompleted(value)
-    }
+    fun getBoolean(key: PrefsBooleanKey) = debugOptions.get(key)
 
-    fun setShowDebugLessonControls(value: Boolean) {
-        debugOptions.setShowDebugLessonControls(value)
-    }
-
-    fun setShouldAutoPause(value: Boolean) {
-        debugOptions.setShouldAutoPause(value)
+    fun setBoolean(key: PrefsBooleanKey, value: Boolean) {
+        debugOptions.set(key, value)
     }
 
     private fun getModifiedPausepointsJsonFlow(): Flow<String>? {

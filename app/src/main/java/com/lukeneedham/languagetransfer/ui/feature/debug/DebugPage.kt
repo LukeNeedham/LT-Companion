@@ -35,6 +35,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lukeneedham.languagetransfer.R
+import com.lukeneedham.languagetransfer.data.persistence.prefs.PrefsBooleanKey
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
 import com.lukeneedham.languagetransfer.ui.theme.Colors
 import com.lukeneedham.languagetransfer.ui.util.SystemBarsColor
@@ -207,30 +208,27 @@ private fun SettingsSection(
         }
     }
 
-    val allLessonsCompleted by viewModel.allLessonsCompleted.collectAsState()
-    Setting(
-        text = "Unlock all lessons",
-        checked = allLessonsCompleted,
-        onCheckedChange = {
-            viewModel.setAllLessonsCompleted(it)
-        },
-    )
+    @Composable
+    fun BooleanSetting(key: PrefsBooleanKey) {
+        val name = key.name
+            // Add a space before every uppercase letter
+            .replace(Regex("([a-z])([A-Z])"), "$1 $2")
+            // Convert the entire string to lowercase
+            .lowercase()
+            // Capitalize only the very first letter
+            .replaceFirstChar { it.uppercase() }
 
-    val showDebugLessonControls by viewModel.showDebugLessonControls.collectAsState()
-    Setting(
-        text = "Show debug lesson controls",
-        checked = showDebugLessonControls,
-        onCheckedChange = {
-            viewModel.setShowDebugLessonControls(it)
-        },
-    )
+        val checked by viewModel.getBoolean(key).collectAsState()
+        Setting(
+            text = name,
+            checked = checked,
+            onCheckedChange = {
+                viewModel.setBoolean(key, it)
+            },
+        )
+    }
 
-    val autoPause by viewModel.shouldAutoPause.collectAsState()
-    Setting(
-        text = "Auto-pause",
-        checked = autoPause,
-        onCheckedChange = {
-            viewModel.setShouldAutoPause(it)
-        },
-    )
+    PrefsBooleanKey.entries.forEach {
+        BooleanSetting(it)
+    }
 }

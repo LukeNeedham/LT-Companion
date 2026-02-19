@@ -1,25 +1,20 @@
 package com.lukeneedham.languagetransfer.util
 
 import com.lukeneedham.languagetransfer.data.persistence.prefs.DebugPreferencesDao
-import kotlinx.coroutines.flow.StateFlow
+import com.lukeneedham.languagetransfer.data.persistence.prefs.PrefsBooleanKey
 
 /** Holds debug global overrides for testing */
 class DebugOptions(
     private val debugPreferencesDao: DebugPreferencesDao,
 ) {
-    val allLessonsCompleted: StateFlow<Boolean> = debugPreferencesDao.allLessonsCompleted
-    val showDebugLessonControls: StateFlow<Boolean> = debugPreferencesDao.showDebugLessonControls
-    val shouldAutoPause: StateFlow<Boolean> = debugPreferencesDao.shouldAutoPause
+    val allLessonsCompleted = get(PrefsBooleanKey.AllLessonsCompleted)
+    val showDebugLessonControls = get(PrefsBooleanKey.ShowDebugLessonControls)
+    val shouldAutoPause = get(PrefsBooleanKey.ShouldAutoPause)
+    val allowSeekProgressBar = get(PrefsBooleanKey.AllowSeekProgressBar)
 
-    fun setAllLessonsCompleted(value: Boolean) {
-        debugPreferencesDao.setAllLessonsCompleted(value)
+    fun set(key: PrefsBooleanKey, value: Boolean) {
+        debugPreferencesDao.setBoolean(key, value)
     }
 
-    fun setShowDebugLessonControls(value: Boolean) {
-        debugPreferencesDao.setShowDebugLessonControls(value)
-    }
-
-    fun setShouldAutoPause(value: Boolean) {
-        debugPreferencesDao.setShouldAutoPause(value)
-    }
+    fun get(key: PrefsBooleanKey) = debugPreferencesDao.getBooleanFlow(key)
 }

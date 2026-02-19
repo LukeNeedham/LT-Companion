@@ -8,14 +8,11 @@ import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepoint
 import com.lukeneedham.languagetransfer.domain.pausepointreport.PausepointReport
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayer
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
-import com.lukeneedham.languagetransfer.ui.player.PlaybackRepository
 import com.lukeneedham.languagetransfer.ui.player.PlayingState
 import com.lukeneedham.languagetransfer.ui.util.sfx.AppSoundEffectPlayer
 import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffect
-import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffectPlayer
 import com.lukeneedham.languagetransfer.util.AppResult
 import com.lukeneedham.languagetransfer.util.DebugOptions
-import com.lukeneedham.languagetransfer.util.EventChannel
 import com.lukeneedham.languagetransfer.util.model.Millis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -33,6 +30,7 @@ class LessonSpecificViewModel(
     private val audioPlayerProvider: AudioPlayerProvider,
     private val audioLessonRepository: AudioLessonRepository,
     private val soundEffectPlayer: AppSoundEffectPlayer,
+    private val debugOptions: DebugOptions,
 ) {
     private val possibleSpeeds = listOf(1.0f, 1.7f)
 
@@ -137,15 +135,10 @@ class LessonSpecificViewModel(
         }
     }
 
-    /**
-     * Skips backward by 5 seconds.
-     * Also resets the last processed pausepoint index to allow pausing at pausepoints we've already passed.
-     */
     fun skipBackward() {
         val currentPosition = audioPlayer.currentPosition
-        val newPosition = (currentPosition - 5000).coerceAtLeast(0) // 5 seconds
-        audioPlayer.seekTo(newPosition)
-        refreshUiState()
+        val newPosition = (currentPosition - 5000).coerceAtLeast(0)
+        seekTo(newPosition)
     }
 
     fun togglePlaybackSpeed() {
@@ -156,15 +149,27 @@ class LessonSpecificViewModel(
     }
 
     fun skipToEnd() {
-        val nearEndPosition = audioPlayer.duration - 5000 // 5 seconds from end
-        audioPlayer.seekTo(nearEndPosition)
+        val nearEndPosition = audioPlayer.duration - 3000 // a few seconds from end
+        seekTo(nearEndPosition)
+    }
+
+    fun seekTo(pos: Millis) {
+        audioPlayer.seekTo(pos)
+        refreshUiState()
     }
 
     fun jumpForward() {
         val currentPosition = audioPlayer.currentPosition
         val newPosition = (currentPosition + 10000).coerceAtMost(audioPlayer.duration)
-        audioPlayer.seekTo(newPosition)
-        refreshUiState()
+        seekTo(newPosition)
+    }
+
+    fun seekTo(fraction: Float) {
+        if (!debugOptions.allowSeekProgressBar.value) return
+
+        val duration = audioPlayer.duration
+        val newPosition = (duration * fraction).toLong()
+        seekTo(newPosition)
     }
 
     fun reportPausepointMissing() {

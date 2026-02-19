@@ -115,6 +115,7 @@ object KoinModules {
                     audioPlayerProvider = get(),
                     audioLessonRepository = get(),
                     soundEffectPlayer = get(),
+                    debugOptions = get(),
                 )
             }
         }

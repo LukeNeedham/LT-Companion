@@ -36,6 +36,7 @@ fun LessonPage(
         skipBackward = viewModel::skipBackward,
         togglePlaybackSpeed = viewModel::togglePlaybackSpeed,
         skipToEnd = viewModel::skipToEnd,
+        onSeek = viewModel::seekTo,
         jumpForward = viewModel::jumpForward,
         pausepointReporter = viewModel.pausepointReporter,
     )

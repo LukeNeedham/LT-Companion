@@ -8,6 +8,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -17,24 +18,26 @@ private val Context.dataStore by preferencesDataStore(name = "debug_preferences"
 class DebugPreferencesDao(private val context: Context) {
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private val allLessonsCompletedKey = booleanPreferencesKey("all_lessons_completed")
-    private val showDebugLessonControlsKey = booleanPreferencesKey("show_debug_lesson_controls")
-    private val shouldAutoPauseKey = booleanPreferencesKey("should_auto_pause")
+    /** This has to be cached because we aren't really allowed to create prefs keys on the fly */
+    private val booleanKeyToDataFlow =
+        PrefsBooleanKey.entries.associateWith { getBooleanFlowInternal(it) }
 
-    val allLessonsCompleted = getBooleanStateFlow(allLessonsCompletedKey, false)
-    val showDebugLessonControls = getBooleanStateFlow(showDebugLessonControlsKey, false)
-    val shouldAutoPause = getBooleanStateFlow(shouldAutoPauseKey, true)
-
-    fun setAllLessonsCompleted(value: Boolean) {
-        setBoolean(allLessonsCompletedKey, value)
+    fun setBoolean(booleanKey: PrefsBooleanKey, value: Boolean) {
+        val prefsKey = getPrefsKey(booleanKey)
+        setBoolean(prefsKey, value)
     }
 
-    fun setShowDebugLessonControls(value: Boolean) {
-        setBoolean(showDebugLessonControlsKey, value)
+    fun getBooleanFlow(booleanKey: PrefsBooleanKey) =
+        booleanKeyToDataFlow[booleanKey] ?: error("Key missing for $booleanKey")
+
+    private fun getBooleanFlowInternal(booleanKey: PrefsBooleanKey): StateFlow<Boolean> {
+        val prefsKey = getPrefsKey(booleanKey)
+        val default = booleanKey.default
+        return getBooleanStateFlow(prefsKey, default)
     }
 
-    fun setShouldAutoPause(value: Boolean) {
-        setBoolean(shouldAutoPauseKey, value)
+    private fun getPrefsKey(booleanKey: PrefsBooleanKey): Preferences.Key<Boolean> {
+        return booleanPreferencesKey(booleanKey.persistedName)
     }
 
     private fun getBooleanStateFlow(key: Preferences.Key<Boolean>, default: Boolean) =

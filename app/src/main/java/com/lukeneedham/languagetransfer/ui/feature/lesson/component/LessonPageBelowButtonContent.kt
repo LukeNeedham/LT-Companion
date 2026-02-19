@@ -34,6 +34,7 @@ fun LessonPageBelowButtonContent(
     togglePlaybackSpeed: () -> Unit,
     skipToEnd: () -> Unit,
     jumpForward: () -> Unit,
+    onSeek: (Float) -> Unit,
     pausepointReporter: PausepointReporter,
 ) {
     val durationBarData = when (state) {
@@ -130,6 +131,7 @@ fun LessonPageBelowButtonContent(
                 currentPosition = target.currentPosition,
                 duration = target.totalDuration,
                 pausepointFractions = target.pausepointFractions,
+                onSeek = onSeek,
             )
         }
     }

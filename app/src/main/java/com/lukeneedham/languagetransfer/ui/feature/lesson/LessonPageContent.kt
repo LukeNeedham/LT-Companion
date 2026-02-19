@@ -20,6 +20,7 @@ fun LessonPageContent(
     skipBackward: () -> Unit,
     togglePlaybackSpeed: () -> Unit,
     skipToEnd: () -> Unit,
+    onSeek: (Float) -> Unit,
     jumpForward: () -> Unit,
     pausepointReporter: PausepointReporter,
 ) {
@@ -45,6 +46,7 @@ fun LessonPageContent(
                 togglePlaybackSpeed = togglePlaybackSpeed,
                 skipToEnd = skipToEnd,
                 jumpForward = jumpForward,
+                onSeek = onSeek,
                 pausepointReporter = pausepointReporter,
                 showDebugLessonControls = showDebugLessonControls,
             )
@@ -64,6 +66,7 @@ private fun Preview() {
         togglePlaybackSpeed = {},
         skipToEnd = {},
         jumpForward = {},
+        onSeek = {},
         pausepointReporter = MockDataLesson.pausepointReporter,
         showDebugLessonControls = false,
     )
