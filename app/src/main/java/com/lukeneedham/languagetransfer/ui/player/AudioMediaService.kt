@@ -5,6 +5,7 @@ import android.view.KeyEvent
 import androidx.annotation.OptIn
 import androidx.core.content.IntentCompat
 import androidx.media3.common.AudioAttributes
+import androidx.media3.common.ForwardingPlayer
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -31,7 +32,7 @@ import org.koin.android.ext.android.inject
 
 class AudioMediaService : MediaSessionService() {
 
-    private var player: ExoPlayer? = null
+    private var player: Player? = null
     private var mediaSession: MediaSession? = null
 
     // DI
@@ -70,108 +71,18 @@ class AudioMediaService : MediaSessionService() {
             }
         }
 
-        val p = ExoPlayer.Builder(this).build().apply {
-            // Configure sensible audio attributes so playback respects device settings
-            setAudioAttributes(
-                AudioAttributes.DEFAULT,
-                /* handleAudioFocus= */ true
-            )
-        }
-        player = p
+        val player = createAudioPlayer()
+        this.player = player
 
-        p.addListener(object : Player.Listener {
-            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                observePausepointsForCurrentItem()
-            }
-
-            override fun onPositionDiscontinuity(
-                oldPosition: Player.PositionInfo,
-                newPosition: Player.PositionInfo,
-                reason: Int,
-            ) {
-                if (reason == Player.DISCONTINUITY_REASON_SEEK) {
-                    pausepointChecker.onSeek(newPosition.positionMs)
-                }
-            }
-
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                if (isPlaying) {
-                    // Resumed
-                    playbackRepository.onStateUpdate(PlayingState.Playing)
-                    startPausepointCheck()
-                } else {
-                    // Paused: reason is Auto if set by pausepoint handler, otherwise Manual
-                    val reason = lastPauseReason ?: PlayingState.Paused.Reason.Manual
-                    // Reset reason
-                    lastPauseReason = null
-
-                    playbackRepository.onStateUpdate(PlayingState.Paused(reason))
-                    stopPausepointCheck()
-                }
-            }
-
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                if (playbackState == Player.STATE_READY) {
-                    // Ensure pausepoints loaded when ready (covers first item)
-                    observePausepointsForCurrentItem()
-                }
-                if (playbackState == Player.STATE_ENDED) {
-                    stopPausepointCheck()
-                }
-            }
-        })
-
-        if (p.isPlaying) {
+        if (player.isPlaying) {
             startPausepointCheck()
         }
 
-        @OptIn(UnstableApi::class)
-        val mediaSessionCallback = object : MediaSession.Callback {
-            // Inside your MediaSession.Callback
-            override fun onMediaButtonEvent(
-                session: MediaSession,
-                controllerInfo: MediaSession.ControllerInfo,
-                intent: Intent,
-            ): Boolean {
-                val p = player
-                val isPlaying = p != null && p.mediaItemCount > 0
-                // Delegate to system if currently playing
-                if (isPlaying) return false
-
-                val keyEvent = IntentCompat.getParcelableExtra(
-                    intent,
-                    Intent.EXTRA_KEY_EVENT,
-                    KeyEvent::class.java,
-                )
-
-                val unhandledResumeKeycodes = listOf(
-                    KeyEvent.KEYCODE_MEDIA_PLAY,
-                    KeyEvent.KEYCODE_MEDIA_PAUSE,
-                    KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-                    KeyEvent.KEYCODE_HEADSETHOOK,
-                    KeyEvent.KEYCODE_MEDIA_NEXT,
-                )
-                val isUnhandledResume =
-                    keyEvent?.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode in unhandledResumeKeycodes
-
-                // Delegate to rest of app
-                if (isUnhandledResume) {
-                    playbackRepository.onUnhandledResumeEvent()
-                    return true
-                }
-
-                // Not delegated to app, let system handle it
-                return false
-            }
-        }
-        mediaSession = MediaSession.Builder(this, p)
-            .setCallback(mediaSessionCallback)
+        mediaSession = MediaSession.Builder(this, player)
+            .setCallback(createMediaSessionCallback())
             .build()
 
         setupNotification()
-
-        // Attempt initial pausepoints setup (in case item already set before listener fires)
-        observePausepointsForCurrentItem()
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
@@ -243,7 +154,104 @@ class AudioMediaService : MediaSessionService() {
         )
     }
 
+    @OptIn(UnstableApi::class)
+    private fun createAudioPlayer(): Player {
+        val exoPlayer = ExoPlayer.Builder(this).build().apply {
+            // Configure sensible audio attributes so playback respects device settings
+            setAudioAttributes(
+                AudioAttributes.DEFAULT,
+                /* handleAudioFocus= */ true
+            )
+        }
+
+        val forwardingPlayer = object : ForwardingPlayer(exoPlayer) {
+            override fun seekTo(positionMs: Long) {
+                pausepointChecker.preSeek()
+                super.seekTo(positionMs)
+            }
+        }
+
+        forwardingPlayer.addListener(object : Player.Listener {
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                observePausepointsForCurrentItem()
+            }
+
+            override fun onPositionDiscontinuity(
+                oldPosition: Player.PositionInfo,
+                newPosition: Player.PositionInfo,
+                reason: Int,
+            ) {
+                if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                    pausepointChecker.onSeekCompleted(newPosition.positionMs)
+                }
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (isPlaying) {
+                    // Resumed
+                    playbackRepository.onStateUpdate(PlayingState.Playing)
+                    startPausepointCheck()
+                } else {
+                    // Paused: reason is Auto if set by pausepoint handler, otherwise Manual
+                    val reason = lastPauseReason ?: PlayingState.Paused.Reason.Manual
+                    // Reset reason
+                    lastPauseReason = null
+
+                    playbackRepository.onStateUpdate(PlayingState.Paused(reason))
+                    stopPausepointCheck()
+                }
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_ENDED) {
+                    stopPausepointCheck()
+                }
+            }
+        })
+
+        return forwardingPlayer
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun createMediaSessionCallback() = object : MediaSession.Callback {
+        override fun onMediaButtonEvent(
+            session: MediaSession,
+            controllerInfo: MediaSession.ControllerInfo,
+            intent: Intent,
+        ): Boolean {
+            val p = player
+            val isPlaying = p != null && p.mediaItemCount > 0
+            // Delegate to system if currently playing
+            if (isPlaying) return false
+
+            val keyEvent = IntentCompat.getParcelableExtra(
+                intent,
+                Intent.EXTRA_KEY_EVENT,
+                KeyEvent::class.java,
+            )
+
+            val unhandledResumeKeycodes = listOf(
+                KeyEvent.KEYCODE_MEDIA_PLAY,
+                KeyEvent.KEYCODE_MEDIA_PAUSE,
+                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                KeyEvent.KEYCODE_HEADSETHOOK,
+                KeyEvent.KEYCODE_MEDIA_NEXT,
+            )
+            val isUnhandledResume =
+                keyEvent?.action == KeyEvent.ACTION_DOWN && keyEvent.keyCode in unhandledResumeKeycodes
+
+            // Delegate to rest of app
+            if (isUnhandledResume) {
+                playbackRepository.onUnhandledResumeEvent()
+                return true
+            }
+
+            // Not delegated to app, let system handle it
+            return false
+        }
+    }
+
     companion object {
-        val pausepointCheckInterval: Millis = 10
+        const val pausepointCheckInterval: Millis = 100
     }
 }
