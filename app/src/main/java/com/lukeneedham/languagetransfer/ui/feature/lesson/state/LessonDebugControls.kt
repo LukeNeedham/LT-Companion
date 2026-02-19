@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -14,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -35,48 +37,70 @@ fun LessonDebugControls(
 ) {
     val surface = Colors.glassy
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+    val shape = RoundedCornerShape(20.dp)
+    Row(
         modifier = Modifier
-            .background(color = surface, shape = RoundedCornerShape(20.dp))
-            .padding(5.dp)
+            .background(color = surface, shape = shape)
+            .clip(shape)
+            .padding(start = 10.dp)
+            .height(IntrinsicSize.Min)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .height(50.dp)
+        Column(
+            modifier = Modifier.fillMaxHeight()
         ) {
-            Button(text = "${speed}x", onClick = togglePlaybackSpeed)
-            Button(text = "End", onClick = skipToEnd)
-            Button(text = "Backward", onClick = jumpBackward)
-            Button(text = "Forward", onClick = jumpForward)
+            @Composable
+            fun Title(text: String) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = text,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+
+            Title("Player:")
+            Title("Pause:")
         }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .height(50.dp)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = "Pause:",
-                fontWeight = FontWeight.Bold,
-            )
-            Button(
-                text = "Add",
-                onClick = { pausepointReporter.add() }
-            )
-            Button(
-                text = "Remove",
-                onClick = { pausepointReporter.remove() }
-            )
-            Button(
-                text = "Shift\nearlier",
-                onClick = { pausepointReporter.shiftEarlier() }
-            )
-            Button(
-                text = "Shift\nlater",
-                onClick = { pausepointReporter.shiftLater() }
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .height(55.dp)
+            ) {
+                Button(text = "${speed}x", onClick = togglePlaybackSpeed)
+                Button(text = "End", onClick = skipToEnd)
+                Button(text = "Backward", onClick = jumpBackward)
+                Button(text = "Forward", onClick = jumpForward)
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .height(50.dp)
+            ) {
+                Button(
+                    text = "Add",
+                    onClick = { pausepointReporter.add() }
+                )
+                Button(
+                    text = "Remove",
+                    onClick = { pausepointReporter.remove() }
+                )
+                Button(
+                    text = "Shift\nearlier",
+                    onClick = { pausepointReporter.shiftEarlier() }
+                )
+                Button(
+                    text = "Shift\nlater",
+                    onClick = { pausepointReporter.shiftLater() }
+                )
+            }
         }
     }
 }
