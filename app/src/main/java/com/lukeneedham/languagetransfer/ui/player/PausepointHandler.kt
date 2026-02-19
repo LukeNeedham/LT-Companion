@@ -17,13 +17,10 @@ class PausepointHandler(
 
     var onPausepointHitListener: () -> Unit = {}
 
-    private val triggerPausepoints: List<Millis>
-        get() = pausepoints.map { (it - pausepointTriggerOffset).coerceAtLeast(0) }
-
     private val handledPausepoints = mutableListOf<Millis>()
 
     fun checkPausepoints(currentPosition: Millis) {
-        val nextPausepoint = triggerPausepoints.firstOrNull { pausepoint ->
+        val nextPausepoint = pausepoints.firstOrNull { pausepoint ->
             pausepoint > currentPosition
         } ?: return
 
@@ -50,6 +47,5 @@ class PausepointHandler(
 
     private companion object {
         const val progressTickMillis: Millis = 10
-        const val pausepointTriggerOffset: Millis = 0
     }
 }
