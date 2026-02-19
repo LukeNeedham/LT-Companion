@@ -1,6 +1,5 @@
 package com.lukeneedham.languagetransfer.ui.player
 
-import android.util.Log
 import com.lukeneedham.languagetransfer.util.DebugOptions
 import com.lukeneedham.languagetransfer.util.model.Millis
 import kotlinx.coroutines.CoroutineScope
@@ -37,7 +36,6 @@ class PausepointChecker(
     fun setPausepoints(pausepoints: List<Millis>) {
         scope.launch {
             muted = true
-            Log.e("luke_pp", "setPausepoints")
             val sortedPausepoints = pausepoints.sorted()
             allPausepoints = sortedPausepoints
             unhandledPausepoints.clear()
@@ -48,7 +46,7 @@ class PausepointChecker(
 
     fun checkPausepoints(currentPosition: Millis) {
         scope.launch {
-            if(muted) return@launch
+            if (muted) return@launch
             if (!debugOptions.shouldAutoPause.value) return@launch
 
             val nextPausepoint = unhandledPausepoints.firstOrNull() ?: return@launch
@@ -92,6 +90,9 @@ class PausepointChecker(
     }
 
     private fun autoPause() {
+        if (muted) return
+        if (!debugOptions.shouldAutoPause.value) return
+
         onPausepointHitListener()
     }
 }
