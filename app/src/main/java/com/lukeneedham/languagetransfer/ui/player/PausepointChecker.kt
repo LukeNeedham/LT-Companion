@@ -85,7 +85,7 @@ class PausepointChecker(
         // If we're already past the pausepoint, we hit it
         if (delta <= 0) return true
         /** How far we look into the future to consider a pausepoint hit */
-        val maxDelta = pausepointCheckInterval * 2
+        val maxDelta = pausepointCheckInterval * 1.5
         return delta < maxDelta
     }
 
