@@ -74,14 +74,6 @@ fun LessonPageBelowButtonContent(
     ) {
         AnimatedVisibility(
             visible = showControls,
-            enter = slideInVertically(
-                animationSpec = tween(5000),
-                initialOffsetY = { -it },
-            ),
-            exit = slideOutVertically(
-                animationSpec = tween(5000),
-                targetOffsetY = { -it },
-            ),
         ) {
             Column {
                 Spacer(modifier = Modifier.height(20.dp))
