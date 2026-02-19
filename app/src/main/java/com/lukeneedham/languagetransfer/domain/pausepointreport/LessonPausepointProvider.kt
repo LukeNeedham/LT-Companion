@@ -77,10 +77,4 @@ class LessonPausepointProvider(
     companion object {
         val jumpMillis = 100
     }
-
-    class Factory(
-        private val pausepointModificationsDao: PausepointModificationsDao,
-    ) {
-        fun build(lesson: CourseLesson) = LessonPausepointProvider(lesson, pausepointModificationsDao)
-    }
 }

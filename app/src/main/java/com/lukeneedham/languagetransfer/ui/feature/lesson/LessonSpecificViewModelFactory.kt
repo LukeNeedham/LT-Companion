@@ -3,7 +3,7 @@ package com.lukeneedham.languagetransfer.ui.feature.lesson
 import com.lukeneedham.languagetransfer.data.repository.AudioLessonRepository
 import com.lukeneedham.languagetransfer.data.repository.CompletedLessonRepository
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
-import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
+import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProviderCache
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
 import com.lukeneedham.languagetransfer.ui.util.sfx.AppSoundEffectPlayer
 import com.lukeneedham.languagetransfer.util.DebugOptions
@@ -11,7 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 
 class LessonSpecificViewModelFactory(
     private val completedLessonRepository: CompletedLessonRepository,
-    private val lessonPausepointProviderFactory: LessonPausepointProvider.Factory,
+    private val lessonPausepointProviderCache: LessonPausepointProviderCache,
     private val audioPlayerProvider: AudioPlayerProvider,
     private val audioLessonRepository: AudioLessonRepository,
     private val soundEffectPlayer: AppSoundEffectPlayer,
@@ -24,7 +24,7 @@ class LessonSpecificViewModelFactory(
         lesson = lesson,
         coroutineScope = coroutineScope,
         completedLessonRepository = completedLessonRepository,
-        lessonPausepointProviderFactory = lessonPausepointProviderFactory,
+        lessonPausepointProviderCache = lessonPausepointProviderCache,
         audioPlayerProvider = audioPlayerProvider,
         audioLessonRepository = audioLessonRepository,
         soundEffectPlayer = soundEffectPlayer,

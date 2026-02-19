@@ -15,7 +15,7 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.lukeneedham.languagetransfer.R
 import com.lukeneedham.languagetransfer.data.repository.AudioLessonRepository
-import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
+import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProviderCache
 import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffect
 import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffectPlayer
 import com.lukeneedham.languagetransfer.util.AppResult
@@ -37,7 +37,7 @@ class AudioMediaService : MediaSessionService() {
 
     // DI
     private val audioLessonRepository: AudioLessonRepository by inject()
-    private val lessonPausepointProviderFactory: LessonPausepointProvider.Factory by inject()
+    private val lessonPausepointProviderCache: LessonPausepointProviderCache by inject()
     private val playbackRepository: PlaybackRepository by inject()
     private val debugOptions: DebugOptions by inject()
 
@@ -137,9 +137,16 @@ class AudioMediaService : MediaSessionService() {
                 is AppResult.Failure -> null
             } ?: return@launch
 
-            val provider = lessonPausepointProviderFactory.build(lesson)
+            val provider = lessonPausepointProviderCache.get(lesson)
             provider.pausepoints.collectLatest {
-                pausepointChecker.setPausepoints(it)
+                val currentPosition = withContext(Dispatchers.Main) {
+                    p.currentPosition
+                }
+
+                pausepointChecker.setPausepoints(
+                    pausepoints = it,
+                    currentPosition = currentPosition,
+                )
             }
         }
     }

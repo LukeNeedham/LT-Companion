@@ -20,7 +20,7 @@ class PausepointChecker(
     /** Sorted list of all pausepoints for the lesson */
     private var allPausepoints: List<Millis> = emptyList()
 
-    /** A temporary mute on checks - used to avoid race conditions */
+    /** A temporary mute on checks - used to avoid race conditions - maybe superstition ;-) */
     private var muted = false
 
     /**
@@ -33,13 +33,18 @@ class PausepointChecker(
 
     var onPausepointHitListener: () -> Unit = {}
 
-    fun setPausepoints(pausepoints: List<Millis>) {
+    fun setPausepoints(pausepoints: List<Millis>, currentPosition: Millis) {
         scope.launch {
             muted = true
+
             val sortedPausepoints = pausepoints.sorted()
             allPausepoints = sortedPausepoints
+
+            // Update unhandledPausepoints to be all the new future points
+            val newUnhandledPausepoints = sortedPausepoints.filter { it > currentPosition }
             unhandledPausepoints.clear()
-            unhandledPausepoints.addAll(sortedPausepoints)
+            unhandledPausepoints.addAll(newUnhandledPausepoints)
+
             muted = false
         }
     }

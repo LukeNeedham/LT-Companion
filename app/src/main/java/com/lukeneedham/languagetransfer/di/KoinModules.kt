@@ -10,6 +10,7 @@ import com.lukeneedham.languagetransfer.data.repository.CompletedLessonRepositor
 import com.lukeneedham.languagetransfer.data.repository.PausePointsRepository
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
 import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
+import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProviderCache
 import com.lukeneedham.languagetransfer.ui.feature.debug.DebugViewModel
 import com.lukeneedham.languagetransfer.ui.feature.downloadlanguage.DownloadLanguageViewModel
 import com.lukeneedham.languagetransfer.ui.feature.home.HomeViewModel
@@ -40,7 +41,7 @@ object KoinModules {
 
     private val domain
         get() = module {
-            factory { LessonPausepointProvider.Factory(get()) }
+            single { LessonPausepointProviderCache(get()) }
         }
 
     private val player
@@ -111,7 +112,7 @@ object KoinModules {
             factory {
                 LessonSpecificViewModelFactory(
                     completedLessonRepository = get(),
-                    lessonPausepointProviderFactory = get(),
+                    lessonPausepointProviderCache = get(),
                     audioPlayerProvider = get(),
                     audioLessonRepository = get(),
                     soundEffectPlayer = get(),

@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lukeneedham.languagetransfer.data.persistence.prefs.PrefsBooleanKey
 import com.lukeneedham.languagetransfer.data.repository.AudioLessonRepository
-import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
+import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProviderCache
 import com.lukeneedham.languagetransfer.util.AppResult
 import com.lukeneedham.languagetransfer.util.DebugOptions
 import kotlinx.coroutines.flow.Flow
@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 class DebugViewModel(
     private val debugOptions: DebugOptions,
     private val audioLessonRepository: AudioLessonRepository,
-    private val lessonPausepointProviderFactory: LessonPausepointProvider.Factory,
+    private val lessonPausepointProviderCache: LessonPausepointProviderCache,
 ) : ViewModel() {
     var modifiedPausepointsJson by mutableStateOf("")
         private set
@@ -49,7 +49,7 @@ class DebugViewModel(
             is AppResult.Success -> {
                 val lessons = course.value.lessons
                 val pausepointFlows = lessons.map { lesson ->
-                    val pausepointProvider = lessonPausepointProviderFactory.build(lesson)
+                    val pausepointProvider = lessonPausepointProviderCache.get(lesson)
                     pausepointProvider.pausepoints.map {
                         lesson.name to it
                     }

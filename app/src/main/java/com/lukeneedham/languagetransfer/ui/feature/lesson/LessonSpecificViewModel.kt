@@ -4,7 +4,7 @@ import androidx.core.net.toUri
 import com.lukeneedham.languagetransfer.data.repository.AudioLessonRepository
 import com.lukeneedham.languagetransfer.data.repository.CompletedLessonRepository
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
-import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
+import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProviderCache
 import com.lukeneedham.languagetransfer.domain.pausepointreport.PausepointReport
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayer
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
@@ -26,7 +26,7 @@ class LessonSpecificViewModel(
     val lesson: CourseLesson,
     val coroutineScope: CoroutineScope,
     private val completedLessonRepository: CompletedLessonRepository,
-    private val lessonPausepointProviderFactory: LessonPausepointProvider.Factory,
+    private val lessonPausepointProviderCache: LessonPausepointProviderCache,
     private val audioPlayerProvider: AudioPlayerProvider,
     private val audioLessonRepository: AudioLessonRepository,
     private val soundEffectPlayer: AppSoundEffectPlayer,
@@ -34,7 +34,7 @@ class LessonSpecificViewModel(
 ) {
     private val possibleSpeeds = listOf(1.0f, 1.7f)
 
-    private val lessonPausepointProvider = lessonPausepointProviderFactory.build(lesson)
+    private val lessonPausepointProvider = lessonPausepointProviderCache.get(lesson)
 
     private val audioPlayer = createAudioPlayer()
 
