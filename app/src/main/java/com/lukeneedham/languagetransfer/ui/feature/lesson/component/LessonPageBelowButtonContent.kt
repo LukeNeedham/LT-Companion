@@ -72,37 +72,46 @@ fun LessonPageBelowButtonContent(
             .fillMaxSize()
             .padding(horizontal = 20.dp)
     ) {
-        Spacer(modifier = Modifier.height(20.dp))
-
         AnimatedVisibility(
             visible = showControls,
+            enter = slideInVertically(
+                animationSpec = tween(5000),
+                initialOffsetY = { -it },
+            ),
+            exit = slideOutVertically(
+                animationSpec = tween(5000),
+                targetOffsetY = { -it },
+            ),
         ) {
-            if (showDebugLessonControls) {
-                Spacer(modifier = Modifier.height(15.dp))
-                val playbackSpeed = when (state) {
-                    LessonState.Loading,
-                    is LessonState.Completed,
-                    is LessonState.Error -> 1f
+            Column {
+                Spacer(modifier = Modifier.height(20.dp))
 
-                    is LessonState.InProgress -> state.playbackSpeed
+                if (showDebugLessonControls) {
+                    val playbackSpeed = when (state) {
+                        LessonState.Loading,
+                        is LessonState.Completed,
+                        is LessonState.Error -> 1f
+
+                        is LessonState.InProgress -> state.playbackSpeed
+                    }
+                    LessonDebugControls(
+                        speed = playbackSpeed,
+                        togglePlaybackSpeed = togglePlaybackSpeed,
+                        skipToEnd = skipToEnd,
+                        jumpBackward = jumpBackward,
+                        jumpForward = jumpForward,
+                        pausepointReporter = pausepointReporter,
+                    )
+                } else {
+                    // Not in debug mode - only replay is available
+                    CutOutGlassyButton(
+                        painter = painterResource(R.drawable.ic_replay),
+                        contentDescription = "Skip backwards",
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clickable { jumpBackward() }
+                    )
                 }
-                LessonDebugControls(
-                    speed = playbackSpeed,
-                    togglePlaybackSpeed = togglePlaybackSpeed,
-                    skipToEnd = skipToEnd,
-                    jumpBackward = jumpBackward,
-                    jumpForward = jumpForward,
-                    pausepointReporter = pausepointReporter,
-                )
-            } else {
-                // Not in debug mode - only replay is available
-                CutOutGlassyButton(
-                    painter = painterResource(R.drawable.ic_replay),
-                    contentDescription = "Skip backwards",
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clickable { jumpBackward() }
-                )
             }
         }
 
