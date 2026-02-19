@@ -20,9 +20,6 @@ class PausepointChecker(
     /** Sorted list of all pausepoints for the lesson */
     private var allPausepoints: List<Millis> = emptyList()
 
-    /** A temporary mute on checks - used to avoid race conditions - maybe superstition ;-) */
-    private var muted = false
-
     /**
      * Subset of [allPausepoints] with only the points that have NOT been handled.
      * A little bit counter-intuitive compared to tracking the ones that HAVE been handled,
@@ -35,8 +32,6 @@ class PausepointChecker(
 
     fun setPausepoints(pausepoints: List<Millis>, currentPosition: Millis) {
         scope.launch {
-            muted = true
-
             val sortedPausepoints = pausepoints.sorted()
             allPausepoints = sortedPausepoints
 
@@ -44,14 +39,11 @@ class PausepointChecker(
             val newUnhandledPausepoints = sortedPausepoints.filter { it > currentPosition }
             unhandledPausepoints.clear()
             unhandledPausepoints.addAll(newUnhandledPausepoints)
-
-            muted = false
         }
     }
 
     fun checkPausepoints(currentPosition: Millis) {
         scope.launch {
-            if (muted) return@launch
             if (!debugOptions.shouldAutoPause.value) return@launch
 
             val nextPausepoint = unhandledPausepoints.firstOrNull() ?: return@launch
@@ -64,24 +56,11 @@ class PausepointChecker(
         }
     }
 
-    /**
-     * Called when a seek is about to happen -
-     * pausepoint checking should be muted until the seek completes.
-     * This avoids race conditions, since the pausepoint list will change when the seek completes.
-     */
-    fun preSeek() {
-        scope.launch {
-            muted = true
-        }
-    }
-
     fun onSeekCompleted(newPosition: Millis) {
         scope.launch {
-            muted = true
             val newUnhandledPausepoints = allPausepoints.filter { it > newPosition }
             unhandledPausepoints.clear()
             unhandledPausepoints.addAll(newUnhandledPausepoints)
-            muted = false
         }
     }
 
@@ -95,7 +74,6 @@ class PausepointChecker(
     }
 
     private fun autoPause() {
-        if (muted) return
         if (!debugOptions.shouldAutoPause.value) return
 
         onPausepointHitListener()

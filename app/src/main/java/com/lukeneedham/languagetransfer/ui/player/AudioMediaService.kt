@@ -171,14 +171,7 @@ class AudioMediaService : MediaSessionService() {
             )
         }
 
-        val forwardingPlayer = object : ForwardingPlayer(exoPlayer) {
-            override fun seekTo(positionMs: Long) {
-                pausepointChecker.preSeek()
-                super.seekTo(positionMs)
-            }
-        }
-
-        forwardingPlayer.addListener(object : Player.Listener {
+        exoPlayer.addListener(object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 observePausepointsForCurrentItem()
             }
@@ -216,7 +209,7 @@ class AudioMediaService : MediaSessionService() {
             }
         })
 
-        return forwardingPlayer
+        return exoPlayer
     }
 
     @OptIn(UnstableApi::class)
