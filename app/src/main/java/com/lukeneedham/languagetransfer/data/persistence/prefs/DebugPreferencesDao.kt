@@ -43,7 +43,7 @@ class DebugPreferencesDao(private val context: Context) {
     private fun getBooleanStateFlow(key: Preferences.Key<Boolean>, default: Boolean) =
         context.dataStore.data
             .map { it[key] ?: default }
-            .stateIn(scope, started = SharingStarted.WhileSubscribed(5000), initialValue = default)
+            .stateIn(scope, started = SharingStarted.Eagerly, initialValue = default)
 
     private fun setBoolean(key: Preferences.Key<Boolean>, value: Boolean) {
         scope.launch {
