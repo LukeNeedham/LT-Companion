@@ -3,6 +3,7 @@ package com.lukeneedham.languagetransfer.ui.player
 import android.content.Intent
 import android.view.KeyEvent
 import androidx.annotation.OptIn
+import androidx.core.content.IntentCompat
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -14,14 +15,18 @@ import androidx.media3.session.MediaSessionService
 import com.lukeneedham.languagetransfer.R
 import com.lukeneedham.languagetransfer.data.repository.AudioLessonRepository
 import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
+import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffect
+import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffectPlayer
 import com.lukeneedham.languagetransfer.util.AppResult
+import com.lukeneedham.languagetransfer.util.DebugOptions
+import com.lukeneedham.languagetransfer.util.model.Millis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 
 class AudioMediaService : MediaSessionService() {
@@ -33,10 +38,12 @@ class AudioMediaService : MediaSessionService() {
     private val audioLessonRepository: AudioLessonRepository by inject()
     private val lessonPausepointProviderFactory: LessonPausepointProvider.Factory by inject()
     private val playbackRepository: PlaybackRepository by inject()
-    private val pausepointHandler: PausepointHandler by inject()
+    private val debugOptions: DebugOptions by inject()
+
+    private val pausepointChecker = PausepointChecker(pausepointCheckInterval, debugOptions)
 
     // Scope for collecting pausepoints and checking progress
-    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val scope = CoroutineScope(Dispatchers.Default)
     private var pausepointsJob: Job? = null
     private var checkPausepointsJob: Job? = null
 
@@ -46,9 +53,21 @@ class AudioMediaService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
 
-        pausepointHandler.onPausepointHitListener = {
-            lastPauseReason = PlayingState.Paused.Reason.Auto
-            player?.pause()
+        /**
+         * SoundEffectPlayer using the context of the service.
+         * Created in onCreate so context is valid.
+         */
+        val soundEffectPlayer = SoundEffectPlayer(this)
+
+        pausepointChecker.onPausepointHitListener = {
+            // This needs to run on main
+            scope.launch {
+                withContext(Dispatchers.Main) {
+                    soundEffectPlayer.play(SoundEffect.Thump, volume = 0.1f)
+                    lastPauseReason = PlayingState.Paused.Reason.Auto
+                    player?.pause()
+                }
+            }
         }
 
         val p = ExoPlayer.Builder(this).build().apply {
@@ -62,7 +81,7 @@ class AudioMediaService : MediaSessionService() {
 
         p.addListener(object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                updatePausepointsForCurrentItem()
+                observePausepointsForCurrentItem()
             }
 
             override fun onPositionDiscontinuity(
@@ -71,7 +90,7 @@ class AudioMediaService : MediaSessionService() {
                 reason: Int,
             ) {
                 if (reason == Player.DISCONTINUITY_REASON_SEEK) {
-                    pausepointHandler.clearHandledPausepoints()
+                    pausepointChecker.onSeek(newPosition.positionMs)
                 }
             }
 
@@ -94,7 +113,7 @@ class AudioMediaService : MediaSessionService() {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (playbackState == Player.STATE_READY) {
                     // Ensure pausepoints loaded when ready (covers first item)
-                    updatePausepointsForCurrentItem()
+                    observePausepointsForCurrentItem()
                 }
                 if (playbackState == Player.STATE_ENDED) {
                     stopPausepointCheck()
@@ -106,6 +125,7 @@ class AudioMediaService : MediaSessionService() {
             startPausepointCheck()
         }
 
+        @OptIn(UnstableApi::class)
         val mediaSessionCallback = object : MediaSession.Callback {
             // Inside your MediaSession.Callback
             override fun onMediaButtonEvent(
@@ -118,8 +138,11 @@ class AudioMediaService : MediaSessionService() {
                 // Delegate to system if currently playing
                 if (isPlaying) return false
 
-                val keyEvent =
-                    intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, KeyEvent::class.java)
+                val keyEvent = IntentCompat.getParcelableExtra(
+                    intent,
+                    Intent.EXTRA_KEY_EVENT,
+                    KeyEvent::class.java,
+                )
 
                 val unhandledResumeKeycodes = listOf(
                     KeyEvent.KEYCODE_MEDIA_PLAY,
@@ -148,7 +171,7 @@ class AudioMediaService : MediaSessionService() {
         setupNotification()
 
         // Attempt initial pausepoints setup (in case item already set before listener fires)
-        updatePausepointsForCurrentItem()
+        observePausepointsForCurrentItem()
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
@@ -167,15 +190,16 @@ class AudioMediaService : MediaSessionService() {
 
     private fun startPausepointCheck() {
         val p = player ?: return
-        val ph = pausepointHandler
 
         checkPausepointsJob?.cancel()
         checkPausepointsJob = scope.launch {
             while (true) {
-                if (p.isPlaying) {
-                    ph.checkPausepoints(p.currentPosition)
+                // Reading player position requires main thread
+                val position = withContext(Dispatchers.Main) {
+                    p.currentPosition
                 }
-                delay(10)
+                pausepointChecker.checkPausepoints(position)
+                delay(pausepointCheckInterval)
             }
         }
     }
@@ -185,7 +209,7 @@ class AudioMediaService : MediaSessionService() {
         checkPausepointsJob = null
     }
 
-    private fun updatePausepointsForCurrentItem() {
+    private fun observePausepointsForCurrentItem() {
         val p = player ?: return
         val mediaId = p.currentMediaItem?.mediaId ?: return
         val lessonNumber = mediaId.toIntOrNull() ?: return
@@ -203,8 +227,8 @@ class AudioMediaService : MediaSessionService() {
             } ?: return@launch
 
             val provider = lessonPausepointProviderFactory.build(lesson)
-            provider.pausepoints.collectLatest { pps ->
-                pausepointHandler.pausepoints = pps
+            provider.pausepoints.collectLatest {
+                pausepointChecker.setPausepoints(it)
             }
         }
     }
@@ -217,5 +241,9 @@ class AudioMediaService : MediaSessionService() {
                 .setChannelName(R.string.app_name)
                 .build()
         )
+    }
+
+    companion object {
+        val pausepointCheckInterval: Millis = 10
     }
 }

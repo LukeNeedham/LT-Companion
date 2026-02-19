@@ -5,16 +5,25 @@ import android.media.AudioAttributes
 import android.media.SoundPool
 import com.lukeneedham.languagetransfer.R
 
-object SoundEffectPlayer {
+class SoundEffectPlayer(context: Context) {
     private val soundPool = createSoundPool()
     private var effectToIdMap: Map<SoundEffect, Int> = emptyMap()
+
+    init {
+        prepare(context)
+    }
+
+    fun play(effect: SoundEffect, volume: Float = 1f) {
+        val id = effectToIdMap[effect] ?: error("No sound id found for effect: $effect")
+        play(id, volume)
+    }
 
     /**
      * Must be called before anything else.
      * Prefer to do this as soon as possible,
      * so everything is loaded and ready to play when desired
      */
-    fun prepare(context: Context) {
+    private fun prepare(context: Context) {
         fun load(res: Int) = soundPool.load(context, res, 1)
 
         effectToIdMap = SoundEffect.entries.associate { effect ->
@@ -22,11 +31,6 @@ object SoundEffectPlayer {
             val id = load(res)
             effect to id
         }
-    }
-
-    fun play(effect: SoundEffect, volume: Float = 1f) {
-        val id = effectToIdMap[effect] ?: error("No sound id found for effect: $effect")
-        play(id, volume)
     }
 
     private fun getRes(effect: SoundEffect) = when (effect) {

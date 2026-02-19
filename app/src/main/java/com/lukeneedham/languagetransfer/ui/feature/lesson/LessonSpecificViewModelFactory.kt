@@ -5,8 +5,7 @@ import com.lukeneedham.languagetransfer.data.repository.CompletedLessonRepositor
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
 import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
-import com.lukeneedham.languagetransfer.ui.player.PlaybackRepository
-import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffectPlayer
+import com.lukeneedham.languagetransfer.ui.util.sfx.AppSoundEffectPlayer
 import kotlinx.coroutines.CoroutineScope
 
 class LessonSpecificViewModelFactory(
@@ -14,8 +13,7 @@ class LessonSpecificViewModelFactory(
     private val lessonPausepointProviderFactory: LessonPausepointProvider.Factory,
     private val audioPlayerProvider: AudioPlayerProvider,
     private val audioLessonRepository: AudioLessonRepository,
-    private val soundEffectPlayer: SoundEffectPlayer,
-    private val playbackRepository: PlaybackRepository,
+    private val soundEffectPlayer: AppSoundEffectPlayer,
 ) {
     fun create(
         lesson: CourseLesson,

@@ -10,6 +10,7 @@ import com.lukeneedham.languagetransfer.ui.player.AudioPlayer
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
 import com.lukeneedham.languagetransfer.ui.player.PlaybackRepository
 import com.lukeneedham.languagetransfer.ui.player.PlayingState
+import com.lukeneedham.languagetransfer.ui.util.sfx.AppSoundEffectPlayer
 import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffect
 import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffectPlayer
 import com.lukeneedham.languagetransfer.util.AppResult
@@ -31,7 +32,7 @@ class LessonSpecificViewModel(
     private val lessonPausepointProviderFactory: LessonPausepointProvider.Factory,
     private val audioPlayerProvider: AudioPlayerProvider,
     private val audioLessonRepository: AudioLessonRepository,
-    private val soundEffectPlayer: SoundEffectPlayer,
+    private val soundEffectPlayer: AppSoundEffectPlayer,
 ) {
     private val possibleSpeeds = listOf(1.0f, 1.7f)
 

@@ -2,7 +2,8 @@ package com.lukeneedham.languagetransfer
 
 import android.app.Application
 import com.lukeneedham.languagetransfer.di.KoinModules
-import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffectPlayer
+import com.lukeneedham.languagetransfer.ui.util.sfx.AppSoundEffectPlayer
+import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -23,6 +24,7 @@ class App : Application() {
         }
 
         // Prepare sound effects as soon as possible
-        SoundEffectPlayer.prepare(this)
+        val appSoundEffectPlayer = get<AppSoundEffectPlayer>()
+        appSoundEffectPlayer.prepare(this)
     }
 }

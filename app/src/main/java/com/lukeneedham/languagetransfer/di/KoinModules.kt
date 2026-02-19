@@ -18,9 +18,8 @@ import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonViewModel
 import com.lukeneedham.languagetransfer.ui.feature.startup.StartupViewModel
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
 import com.lukeneedham.languagetransfer.ui.player.MediaControllerProvider
-import com.lukeneedham.languagetransfer.ui.player.PausepointHandler
 import com.lukeneedham.languagetransfer.ui.player.PlaybackRepository
-import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffectPlayer
+import com.lukeneedham.languagetransfer.ui.util.sfx.AppSoundEffectPlayer
 import com.lukeneedham.languagetransfer.util.DebugOptions
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -47,12 +46,6 @@ object KoinModules {
     private val player
         get() = module {
             factory { MediaControllerProvider(androidContext()) }
-            factory {
-                PausepointHandler(
-                    soundEffectPlayer = get(),
-                    debugOptions = get(),
-                )
-            }
             single {
                 PlaybackRepository()
             }
@@ -66,7 +59,7 @@ object KoinModules {
 
     private val sfx
         get() = module {
-            single { SoundEffectPlayer }
+            single { AppSoundEffectPlayer() }
         }
 
     private val debug
@@ -122,7 +115,6 @@ object KoinModules {
                     audioPlayerProvider = get(),
                     audioLessonRepository = get(),
                     soundEffectPlayer = get(),
-                    playbackRepository = get(),
                 )
             }
         }
