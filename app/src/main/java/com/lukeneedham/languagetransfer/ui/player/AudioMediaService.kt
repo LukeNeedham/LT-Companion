@@ -5,7 +5,6 @@ import android.view.KeyEvent
 import androidx.annotation.OptIn
 import androidx.core.content.IntentCompat
 import androidx.media3.common.AudioAttributes
-import androidx.media3.common.ForwardingPlayer
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -163,13 +162,16 @@ class AudioMediaService : MediaSessionService() {
 
     @OptIn(UnstableApi::class)
     private fun createAudioPlayer(): Player {
-        val exoPlayer = ExoPlayer.Builder(this).build().apply {
-            // Configure sensible audio attributes so playback respects device settings
-            setAudioAttributes(
-                AudioAttributes.DEFAULT,
-                /* handleAudioFocus= */ true
-            )
-        }
+        val exoPlayer = ExoPlayer.Builder(this)
+            // So media notification can skip backwards
+            .setSeekBackIncrementMs(SkipBackward.millis)
+            .build().apply {
+                // Configure sensible audio attributes so playback respects device settings
+                setAudioAttributes(
+                    AudioAttributes.DEFAULT,
+                    /* handleAudioFocus= */ true
+                )
+            }
 
         exoPlayer.addListener(object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -214,6 +216,46 @@ class AudioMediaService : MediaSessionService() {
 
     @OptIn(UnstableApi::class)
     private fun createMediaSessionCallback() = object : MediaSession.Callback {
+        override fun onConnect(
+            session: MediaSession,
+            controller: MediaSession.ControllerInfo
+        ): MediaSession.ConnectionResult {
+            val superRes = super.onConnect(session, controller)
+
+            /** Is [session] the system Media notification? */
+            val isMediaNotification = session.isMediaNotificationController(controller)
+
+            /** Is [session] coming from Android Auto? */
+            val isAndroidAuto = session.isAutoCompanionController(controller)
+
+            val isThisApp = !isMediaNotification && !isAndroidAuto
+            // If the requester is this app, we can do everything - return unchanged
+            if (isThisApp) return superRes
+
+            // Otherwise we need to strip out all the undesired commands
+            // for requesters like the Media Notification
+            val availablePlayerCommands = superRes.availablePlayerCommands.buildUpon().apply {
+                // Remove the ability to scrub the timeline manually
+                remove(Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM)
+
+                // Remove the "Jump Forward" command
+                remove(Player.COMMAND_SEEK_FORWARD)
+
+                // Remove skipping to the next / previous item
+                remove(Player.COMMAND_SEEK_TO_NEXT)
+                remove(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+                remove(Player.COMMAND_SEEK_TO_PREVIOUS)
+                remove(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+
+                // Add seek backwards
+                add(Player.COMMAND_SEEK_BACK)
+            }
+
+            return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
+                .setAvailablePlayerCommands(availablePlayerCommands.build())
+                .build()
+        }
+
         override fun onMediaButtonEvent(
             session: MediaSession,
             controllerInfo: MediaSession.ControllerInfo,

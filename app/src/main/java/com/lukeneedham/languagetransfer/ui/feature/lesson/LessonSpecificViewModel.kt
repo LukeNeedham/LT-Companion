@@ -9,6 +9,7 @@ import com.lukeneedham.languagetransfer.domain.pausepointreport.PausepointReport
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayer
 import com.lukeneedham.languagetransfer.ui.player.AudioPlayerProvider
 import com.lukeneedham.languagetransfer.ui.player.PlayingState
+import com.lukeneedham.languagetransfer.ui.player.SkipBackward
 import com.lukeneedham.languagetransfer.ui.util.sfx.AppSoundEffectPlayer
 import com.lukeneedham.languagetransfer.ui.util.sfx.SoundEffect
 import com.lukeneedham.languagetransfer.util.AppResult
@@ -137,7 +138,7 @@ class LessonSpecificViewModel(
 
     fun skipBackward() {
         val currentPosition = audioPlayer.currentPosition
-        val newPosition = (currentPosition - 5000).coerceAtLeast(0)
+        val newPosition = (currentPosition - SkipBackward.millis).coerceAtLeast(0)
         seekTo(newPosition)
     }
 
