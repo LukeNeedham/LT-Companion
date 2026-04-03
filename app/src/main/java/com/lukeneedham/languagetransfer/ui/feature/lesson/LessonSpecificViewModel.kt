@@ -81,9 +81,13 @@ class LessonSpecificViewModel(
         coroutineScope.launch {
             while (!isCompleted) {
                 delay(savePositionIntervalMs)
-                val pos = audioPlayer.currentPosition
-                if (pos > 0) {
-                    lessonProgressDao.savePosition(lesson.lessonNumber, pos)
+                // Re-check isCompleted after the delay: if the lesson completed during the delay,
+                // we must not overwrite the clearPosition() call made by onComplete().
+                if (!isCompleted) {
+                    val pos = audioPlayer.currentPosition
+                    if (pos > 0) {
+                        lessonProgressDao.savePosition(lesson.lessonNumber, pos)
+                    }
                 }
             }
         }
