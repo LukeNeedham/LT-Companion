@@ -4,6 +4,7 @@ import com.lukeneedham.languagetransfer.data.network.FileDownloader
 import com.lukeneedham.languagetransfer.data.network.LanguageDownloadRepository
 import com.lukeneedham.languagetransfer.data.persistence.AppDatabase
 import com.lukeneedham.languagetransfer.data.persistence.prefs.DebugPreferencesDao
+import com.lukeneedham.languagetransfer.data.persistence.prefs.LessonProgressDao
 import com.lukeneedham.languagetransfer.data.persistence.prefs.PausepointModificationsDao
 import com.lukeneedham.languagetransfer.data.repository.AudioLessonRepository
 import com.lukeneedham.languagetransfer.data.repository.CompletedLessonRepository
@@ -83,6 +84,7 @@ object KoinModules {
         get() = module {
             single { DebugPreferencesDao(androidContext()) }
             single { PausepointModificationsDao(androidContext()) }
+            single { LessonProgressDao(androidContext()) }
         }
 
     private val repository
@@ -117,6 +119,7 @@ object KoinModules {
                     audioLessonRepository = get(),
                     soundEffectPlayer = get(),
                     debugOptions = get(),
+                    lessonProgressDao = get(),
                 )
             }
         }

@@ -1,5 +1,6 @@
 package com.lukeneedham.languagetransfer.ui.feature.lesson
 
+import com.lukeneedham.languagetransfer.data.persistence.prefs.LessonProgressDao
 import com.lukeneedham.languagetransfer.data.repository.AudioLessonRepository
 import com.lukeneedham.languagetransfer.data.repository.CompletedLessonRepository
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
@@ -16,6 +17,7 @@ class LessonSpecificViewModelFactory(
     private val audioLessonRepository: AudioLessonRepository,
     private val soundEffectPlayer: AppSoundEffectPlayer,
     private val debugOptions: DebugOptions,
+    private val lessonProgressDao: LessonProgressDao,
 ) {
     fun create(
         lesson: CourseLesson,
@@ -29,5 +31,6 @@ class LessonSpecificViewModelFactory(
         audioLessonRepository = audioLessonRepository,
         soundEffectPlayer = soundEffectPlayer,
         debugOptions = debugOptions,
+        lessonProgressDao = lessonProgressDao,
     )
 }

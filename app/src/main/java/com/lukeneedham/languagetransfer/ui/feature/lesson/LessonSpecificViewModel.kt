@@ -1,6 +1,7 @@
 package com.lukeneedham.languagetransfer.ui.feature.lesson
 
 import androidx.core.net.toUri
+import com.lukeneedham.languagetransfer.data.persistence.prefs.LessonProgressDao
 import com.lukeneedham.languagetransfer.data.repository.AudioLessonRepository
 import com.lukeneedham.languagetransfer.data.repository.CompletedLessonRepository
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
@@ -20,6 +21,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
@@ -32,8 +34,9 @@ class LessonSpecificViewModel(
     private val audioLessonRepository: AudioLessonRepository,
     private val soundEffectPlayer: AppSoundEffectPlayer,
     private val debugOptions: DebugOptions,
+    private val lessonProgressDao: LessonProgressDao,
 ) {
-    private val possibleSpeeds = listOf(1.0f, 1.7f)
+    private val possibleSpeeds = listOf(1.0f, 1.5f, 2.0f)
 
     private val lessonPausepointProvider = lessonPausepointProviderCache.get(lesson)
 
@@ -60,6 +63,27 @@ class LessonSpecificViewModel(
                 refreshUiState()
             }
         }
+
+        // Restore saved playback position once the player becomes ready
+        coroutineScope.launch {
+            val savedPos = lessonProgressDao.getSavedPosition(lesson.lessonNumber) ?: return@launch
+            if (savedPos >= minRestoredPositionMs) {
+                // Wait until the player finishes loading before seeking
+                uiStateMutable.first { it !is LessonState.Loading }
+                audioPlayer.seekTo(savedPos)
+            }
+        }
+
+        // Periodically persist the current playback position for resume-on-return
+        coroutineScope.launch {
+            while (true) {
+                delay(savePositionIntervalMs)
+                val pos = audioPlayer.currentPosition
+                if (pos > 0 && !isCompleted) {
+                    lessonProgressDao.savePosition(lesson.lessonNumber, pos)
+                }
+            }
+        }
     }
 
     fun dispose() {
@@ -74,6 +98,8 @@ class LessonSpecificViewModel(
                 coroutineScope.launch {
                     delay(completedDelay)
                     completedLessonRepository.markLessonAsCompleted(lesson.lessonNumber)
+                    // Clear saved position now that the lesson is fully completed
+                    lessonProgressDao.clearPosition(lesson.lessonNumber)
                     isCompleted = true
                     // Stop the audio player, remove the media notification
                     audioPlayer.stop()
@@ -240,5 +266,11 @@ class LessonSpecificViewModel(
     private companion object {
         /** Wait a sec after the end of the audio before moving onto the completed state */
         const val completedDelay: Millis = 500
+
+        /** Save the playback position every 5 seconds */
+        const val savePositionIntervalMs: Millis = 5000
+
+        /** Only restore a saved position if it is at least this far into the lesson */
+        const val minRestoredPositionMs: Millis = 10_000
     }
 }

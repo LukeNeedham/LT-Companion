@@ -5,24 +5,35 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.lukeneedham.languagetransfer.R
 import com.lukeneedham.languagetransfer.ui.feature.common.CutOutGlassyButton
 import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonState
 import com.lukeneedham.languagetransfer.ui.feature.lesson.pausepointreport.PausepointReporter
 import com.lukeneedham.languagetransfer.ui.feature.lesson.state.LessonDebugControls
+import com.lukeneedham.languagetransfer.ui.theme.Colors
 import com.lukeneedham.languagetransfer.ui.util.AnimatedNullableVisibility
 import com.lukeneedham.languagetransfer.util.model.Millis
 
@@ -66,6 +77,14 @@ fun LessonPageBelowButtonContent(
         LessonState.Loading -> true
     }
 
+    val playbackSpeed = when (state) {
+        LessonState.Loading,
+        is LessonState.Completed,
+        is LessonState.Error -> 1f
+
+        is LessonState.InProgress -> state.playbackSpeed
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -79,13 +98,6 @@ fun LessonPageBelowButtonContent(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 if (showDebugLessonControls) {
-                    val playbackSpeed = when (state) {
-                        LessonState.Loading,
-                        is LessonState.Completed,
-                        is LessonState.Error -> 1f
-
-                        is LessonState.InProgress -> state.playbackSpeed
-                    }
                     LessonDebugControls(
                         speed = playbackSpeed,
                         togglePlaybackSpeed = togglePlaybackSpeed,
@@ -95,14 +107,34 @@ fun LessonPageBelowButtonContent(
                         pausepointReporter = pausepointReporter,
                     )
                 } else {
-                    // Not in debug mode - only replay is available
-                    CutOutGlassyButton(
-                        painter = painterResource(R.drawable.ic_replay),
-                        contentDescription = "Skip backwards",
-                        modifier = Modifier
-                            .size(50.dp)
-                            .clickable { jumpBackward() }
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        CutOutGlassyButton(
+                            painter = painterResource(R.drawable.ic_replay),
+                            contentDescription = "Skip backwards",
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clickable { jumpBackward() }
+                        )
+                        // Speed toggle button showing current speed
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(50.dp)
+                                .background(color = Colors.glassy, shape = CircleShape)
+                                .clip(CircleShape)
+                                .clickable { togglePlaybackSpeed() }
+                        ) {
+                            Text(
+                                text = "${playbackSpeed}×",
+                                color = Color.Black,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                    }
                 }
             }
         }
