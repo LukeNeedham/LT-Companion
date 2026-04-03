@@ -71,15 +71,18 @@ class LessonSpecificViewModel(
                 // Wait until the player finishes loading before seeking
                 uiStateMutable.first { it !is LessonState.Loading }
                 audioPlayer.seekTo(savedPos)
+            } else {
+                // Sub-threshold position is not worth restoring; clear it to keep storage clean
+                lessonProgressDao.clearPosition(lesson.lessonNumber)
             }
         }
 
         // Periodically persist the current playback position for resume-on-return
         coroutineScope.launch {
-            while (true) {
+            while (!isCompleted) {
                 delay(savePositionIntervalMs)
                 val pos = audioPlayer.currentPosition
-                if (pos > 0 && !isCompleted) {
+                if (pos > 0) {
                     lessonProgressDao.savePosition(lesson.lessonNumber, pos)
                 }
             }
