@@ -51,7 +51,7 @@ class DebugViewModel(
                 val pausepointFlows = lessons.map { lesson ->
                     val pausepointProvider = lessonPausepointProviderCache.get(lesson)
                     pausepointProvider.pausepoints.map {
-                        lesson.name to it
+                        lesson.audioFileName to it
                     }
                 }
                 combine(pausepointFlows) { values ->

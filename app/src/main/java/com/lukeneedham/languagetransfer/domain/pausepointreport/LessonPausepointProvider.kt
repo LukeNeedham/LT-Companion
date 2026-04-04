@@ -13,7 +13,7 @@ class LessonPausepointProvider(
     private val lesson: CourseLesson,
     private val pausepointModificationsDao: PausepointModificationsDao,
 ) {
-    private val lessonName = lesson.name
+    private val lessonName = lesson.audioFileName
     private val reports = mutableListOf<PausepointReport>()
 
     private val modifiedPausepoints = MutableStateFlow(lesson.pausepoints)

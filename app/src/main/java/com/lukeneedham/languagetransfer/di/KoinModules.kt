@@ -7,6 +7,7 @@ import com.lukeneedham.languagetransfer.data.persistence.prefs.DebugPreferencesD
 import com.lukeneedham.languagetransfer.data.persistence.prefs.PausepointModificationsDao
 import com.lukeneedham.languagetransfer.data.repository.AudioLessonRepository
 import com.lukeneedham.languagetransfer.data.repository.CompletedLessonRepository
+import com.lukeneedham.languagetransfer.data.repository.LessonNamesRepository
 import com.lukeneedham.languagetransfer.data.repository.PausePointsRepository
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
 import com.lukeneedham.languagetransfer.domain.pausepointreport.LessonPausepointProvider
@@ -88,7 +89,8 @@ object KoinModules {
     private val repository
         get() = module {
             factory { PausePointsRepository(androidContext()) }
-            single { AudioLessonRepository(get(), get()) }
+            factory { LessonNamesRepository(androidContext()) }
+            single { AudioLessonRepository(get(), get(), get()) }
             factory { LanguageDownloadRepository(get(), androidContext()) }
             single { CompletedLessonRepository(get()) }
         }
