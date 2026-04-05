@@ -94,7 +94,7 @@ class HomeViewModel(
                     /** This item has a bookmark when the previous lesson is the last completed lesson,
                      * but only when the lesson is not the current (last unlocked) lesson */
                     val hasBookmark = lessonNumber == lessonNumWithBookmark
-                            && progress != HomeLessonItem.Progress.Current
+                            && progress !is HomeLessonItem.Progress.Current
                     HomeLessonItem(
                         lesson = lesson,
                         progress = progress,
