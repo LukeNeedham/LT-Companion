@@ -12,8 +12,9 @@ object MockDataLesson {
     val colorScheme = ColorScheme(colors)
 
     val lesson = CourseLesson(
-        name = "Lesson 1",
+        audioFileName = "Lesson 1",
         lessonNumber = 1,
+        lessonName = "Lesson 1",
         pausepoints = emptyList(),
         audioFile = File(""),
         totalDuration = 10000,

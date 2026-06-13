@@ -55,8 +55,9 @@ fun DebugPage(
     val clipboardManager = LocalClipboardManager.current
 
     val dummyLesson = CourseLesson(
-        name = "Dummy Lesson",
+        audioFileName = "Dummy Lesson",
         lessonNumber = 1,
+        lessonName = "Dummy Lesson",
         pausepoints = emptyList(),
         audioFile = File(""),
         totalDuration = 1000,

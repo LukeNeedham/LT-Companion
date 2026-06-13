@@ -77,6 +77,14 @@ fun LessonItem(
                 color = textColor,
             )
 
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = lesson.lessonName,
+                fontSize = 16.sp,
+                color = textColor.copy(alpha = 0.85f),
+            )
+
             Spacer(modifier = Modifier.height(10.dp))
 
             val duration = DurationFormatter.format(lesson.totalDuration)
