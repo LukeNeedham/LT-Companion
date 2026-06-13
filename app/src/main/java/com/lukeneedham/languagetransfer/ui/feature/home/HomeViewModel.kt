@@ -72,7 +72,8 @@ class HomeViewModel(
                 val course = courseRes.value
 
                 val lastCompletedNum = mostRecentCompletedLessonNumber
-                val lessonNumWithBookmark = if (lastCompletedNum == null) null else lastCompletedNum + 1
+                val lessonNumWithBookmark =
+                    if (lastCompletedNum == null) null else lastCompletedNum + 1
 
                 val lessons = course.lessons.map { lesson ->
                     val lessonNumber = lesson.lessonNumber
@@ -91,10 +92,12 @@ class HomeViewModel(
                         else -> HomeLessonItem.Progress.Locked
                     }
 
-                    /** This item has a bookmark when the previous lesson is the last completed lesson,
-                     * but only when the lesson is not the current (last unlocked) lesson */
+                    /**
+                     * This item has a bookmark when the previous lesson is the last completed lesson,
+                     * but only when the lesson is not the current (last unlocked) lesson
+                     */
                     val hasBookmark = lessonNumber == lessonNumWithBookmark
-                            && progress !is HomeLessonItem.Progress.Current
+                            && progress != HomeLessonItem.Progress.Current
                     HomeLessonItem(
                         lesson = lesson,
                         progress = progress,
