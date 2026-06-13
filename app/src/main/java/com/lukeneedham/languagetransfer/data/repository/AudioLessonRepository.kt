@@ -17,6 +17,7 @@ import java.io.File
 class AudioLessonRepository(
     private val pausePointsRepository: PausePointsRepository,
     private val languageDownloadRepository: LanguageDownloadRepository,
+    private val lessonNamesRepository: LessonNamesRepository,
 ) {
     /** Cache to avoid loading the same data multiple times */
     private val cache = mutableMapOf<String, LanguageCourse>()
@@ -49,19 +50,33 @@ class AudioLessonRepository(
                 // The directory where audio files for this language should be stored
                 val courseDir = languageDownloadRepository.getSpanishCourseDir()
 
+                // Load lesson names, mapping lessonId -> lessonName for quick lookup
+                val lessonNamesResult = lessonNamesRepository.getLessonNames(language)
+                val lessonNameMap: Map<String, String> = when (lessonNamesResult) {
+                    is AppResult.Success -> lessonNamesResult.value.associate { it.lessonId to it.lessonName }
+                    is AppResult.Failure -> {
+                        Log.e("AudioLessonRepository", "Failed to load lesson names: ${lessonNamesResult.error}")
+                        emptyMap()
+                    }
+                }
+
                 val files = courseDir.listFiles() ?: emptyArray()
                 val lessons = files.sortedBy { it.name }.mapIndexedNotNull { index, file ->
-                    val lessonName = file.name
-                    val lessonPausepoints = languagePausePoints.audioToPausepoints[lessonName]
+                    val lessonFileName = file.name
+                    val lessonPausepoints = languagePausePoints.audioToPausepoints[lessonFileName]
                     if (lessonPausepoints == null) {
-                        Log.e("AudioLessonRepository", "No pausepoints for $lessonName")
+                        Log.e("AudioLessonRepository", "No pausepoints for $lessonFileName")
                         return@mapIndexedNotNull null
                     }
 
                     val lessonNumber = index + 1
+                    // The lessonId in the names JSON matches the audio file name without the extension
+                    val lessonId = lessonFileName.substringBeforeLast(".")
+                    val lessonName = lessonNameMap[lessonId] ?: "Lesson $lessonNumber"
                     CourseLesson(
-                        name = lessonName,
+                        audioFileName = lessonFileName,
                         lessonNumber = lessonNumber,
+                        lessonName = lessonName,
                         pausepoints = lessonPausepoints.sorted(),
                         audioFile = file,
                         totalDuration = getAudioDuration(file),
