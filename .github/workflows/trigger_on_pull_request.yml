@@ -1,0 +1,64 @@
+name: On Pull Request
+
+on:
+    workflow_call: # Make's sure this job can be acted.
+    workflow_dispatch: {}
+    pull_request:
+        branches:
+            # The following branches are worth running the checks on
+            - main
+
+permissions:
+  id-token: write
+  contents: read
+  # So we can write comments from the workflow
+  pull-requests: write
+
+jobs:
+    # Run the gradle build - 
+    # this job handles all the work related to the outputs of the gradle build,
+    # so we don't have to pass large files between jobs.
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+          - uses: actions/checkout@v4
+
+          # Setup Java
+          - name: set up JDK 17
+            uses: actions/setup-java@v4
+            with:
+              java-version: '17'
+              distribution: 'zulu'
+              cache: 'gradle' # Automatically cache build dependencies
+
+          # Build test apk
+          - name: Run CLI - Build
+            shell: bash
+            run: ./gradlew assembleDebug
+
+          # Upload example app to PR
+          - name: Upload Example App APK
+            id: upload-apk
+            uses: actions/upload-artifact@v7
+            with:
+              name: App APK
+              path: ./app/build/outputs/apk/debug/app-debug.apk
+              retention-days: 10
+              compression-level: 0
+              # Download the APK directly, not in a zip.
+              # We also save a lot of time by not trying to compress the apk.
+              archive: false
+
+          # Set time we can timestamp messages
+          - name: Set current time
+            run: echo "CURRENT_TIME=$(TZ='Europe/Amsterdam' date +'%d/%m/%Y %H:%M:%S')" >> $GITHUB_ENV
+
+          # Write a comment on the PR with the link to the uploaded example app apk
+          - name: Write Example APK comment
+            uses: marocchino/sticky-pull-request-comment@v3
+            with:
+              header: example-app-link
+              message: |
+                Example APK: ${{ steps.upload-apk.outputs.artifact-url }}
+                From: ${{ env.CURRENT_TIME }}
