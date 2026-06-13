@@ -43,7 +43,6 @@ jobs:
               # We create a safe tag name using the unique PR number and GitHub run attempt
               echo "RELEASE_TAG=pr-${{ github.event.pull_request.number || 'manual' }}-build-${{ github.run_number }}-${{ github.run_attempt }}" >> $GITHUB_ENV
 
-          # NEW: Create a unique GitHub Release and upload the APK
           - name: Create Release and Upload APK
             id: create-release
             uses: ncipollo/release-action@v1
