@@ -44,18 +44,18 @@ jobs:
               echo "RELEASE_TAG=pr-${{ github.event.pull_request.number || 'manual' }}-build-${{ github.run_number }}-${{ github.run_attempt }}" >> $GITHUB_ENV
 
           - name: Generate Release Tag
-              id: generate-tag
-              run: |
-                # Use head_ref for PRs, fallback to ref_name for manual dispatches
-                RAW_BRANCH="${{ github.head_ref || github.ref_name }}"
-                
-                # Replace slashes and special characters with dashes, convert to lowercase
-                CLEAN_BRANCH=$(echo "$RAW_BRANCH" | sed 's/[^a-zA-Z0-9]/--/g' | tr '[:upper:]' '[:lower:]')
-                
-                # Combine branch name with run identifiers
-                TAG_NAME="${CLEAN_BRANCH}-b${{ github.run_number }}-${{ github.run_attempt }}"
-                
-                echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+            id: generate-tag
+            run: |
+              # Use head_ref for PRs, fallback to ref_name for manual dispatches
+              RAW_BRANCH="${{ github.head_ref || github.ref_name }}"
+              
+              # Replace slashes and special characters with dashes, convert to lowercase
+              CLEAN_BRANCH=$(echo "$RAW_BRANCH" | sed 's/[^a-zA-Z0-9]/--/g' | tr '[:upper:]' '[:lower:]')
+              
+              # Combine branch name with run identifiers
+              TAG_NAME="${CLEAN_BRANCH}-b${{ github.run_number }}-${{ github.run_attempt }}"
+              
+              echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
 
           # Create a unique GitHub Release and upload the APK
           - name: Create Release and Upload APK
