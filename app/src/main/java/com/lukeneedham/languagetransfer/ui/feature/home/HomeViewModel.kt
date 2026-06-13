@@ -24,6 +24,8 @@ class HomeViewModel(
     private val debugOptions: DebugOptions,
 ) : ViewModel() {
     private var completedLessonNumbers: List<Int>? = null
+
+    /** Null for initial and when there are no completed lessons */
     private var mostRecentCompletedLessonNumber: Int? = null
     private var debugAllLessonsCompleted: Boolean = false
     private val courseResult = audioLessonRepository.getLanguageCourse()
@@ -72,7 +74,8 @@ class HomeViewModel(
                 val course = courseRes.value
 
                 val lastCompletedNum = mostRecentCompletedLessonNumber
-                val lessonNumWithBookmark = if (lastCompletedNum == null) null else lastCompletedNum + 1
+                val lessonNumWithBookmark =
+                    if (lastCompletedNum == null) null else lastCompletedNum + 1
 
                 val lessons = course.lessons.map { lesson ->
                     val lessonNumber = lesson.lessonNumber
@@ -117,7 +120,7 @@ class HomeViewModel(
     fun observeMostRecentCompletedLesson() {
         viewModelScope.launch {
             completedLessonRepository.getMostRecentCompletedLessonFlow().collect {
-                mostRecentCompletedLessonNumber = it.lessonId
+                mostRecentCompletedLessonNumber = it?.lessonId
                 refreshUiState()
             }
         }
