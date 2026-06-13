@@ -50,8 +50,8 @@ jobs:
               RAW_BRANCH="${{ github.head_ref || github.ref_name }}"
               
               # Replace slashes and special characters with dashes, convert to lowercase
-              CLEAN_BRANCH=$(echo "$RAW_BRANCH" | sed 's/[^a-zA-Z0-9]/--/g' | tr '[:upper:]' '[:lower:]')
-              
+              CLEAN_BRANCH=$(echo "$RAW_BRANCH" | sed 's/\//-/g' | tr '[:upper:]' '[:lower:]')
+
               # Combine branch name with run identifiers
               TAG_NAME="${CLEAN_BRANCH}-b${{ github.run_number }}-${{ github.run_attempt }}"
               
@@ -65,7 +65,7 @@ jobs:
               artifacts: "./app/build/outputs/apk/debug/app-debug.apk"
               tag: ${{ steps.generate-tag.outputs.tag }}
               name: "PR Build: ${{ github.head_ref || github.ref_name }}"
-              body: "Debug build generated automatically from branch: ${{ github.head_ref || github.ref_name }}."
+              body: "Debug build generated automatically from branch: ${{ github.head_ref || github.ref_name }} at ${{ env.CURRENT_TIME }}"
               prerelease: true
               draft: false
 
@@ -76,7 +76,7 @@ jobs:
               header: example-app-link
               message: |
                 App apk at: 
-                https://github.com/${{ github.repository }}/releases/download/${{ env.RELEASE_TAG }}/app-debug.apk
-                
+                https://github.com/${{ github.repository }}/releases/download/${{ steps.generate-tag.outputs.tag }}/app-debug.apk
+
                 * **Triggered by:** PR Commit `${{ github.sha }}`
                 * **Built at:** ${{ env.CURRENT_TIME }}
