@@ -55,7 +55,7 @@ class CompletedLessonRepository(
         return completedLessonDao.getAllCompletedLessonsFlow()
     }
 
-    fun getMostRecentCompletedLessonFlow(): Flow<CompletedLessonEntity> {
+    fun getMostRecentCompletedLessonFlow(): Flow<CompletedLessonEntity?> {
         return completedLessonDao.getMostRecentCompletedLessonFlow()
     }
 
