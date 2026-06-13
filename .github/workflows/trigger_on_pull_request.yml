@@ -53,7 +53,7 @@ jobs:
               CLEAN_BRANCH=$(echo "$RAW_BRANCH" | sed 's/\//-/g' | tr '[:upper:]' '[:lower:]')
 
               # Combine branch name with run identifiers
-              TAG_NAME="${CLEAN_BRANCH}-b${{ github.run_number }}-${{ github.run_attempt }}"
+              TAG_NAME="${CLEAN_BRANCH}-${{ github.run_number }}-${{ github.run_attempt }}"
               
               echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
 
