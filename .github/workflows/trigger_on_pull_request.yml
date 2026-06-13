@@ -43,15 +43,29 @@ jobs:
               # We create a safe tag name using the unique PR number and GitHub run attempt
               echo "RELEASE_TAG=pr-${{ github.event.pull_request.number || 'manual' }}-build-${{ github.run_number }}-${{ github.run_attempt }}" >> $GITHUB_ENV
 
-          # NEW: Create a unique GitHub Release and upload the APK
+          - name: Generate Release Tag
+              id: generate-tag
+              run: |
+                # Use head_ref for PRs, fallback to ref_name for manual dispatches
+                RAW_BRANCH="${{ github.head_ref || github.ref_name }}"
+                
+                # Replace slashes and special characters with dashes, convert to lowercase
+                CLEAN_BRANCH=$(echo "$RAW_BRANCH" | sed 's/[^a-zA-Z0-9]/--/g' | tr '[:upper:]' '[:lower:]')
+                
+                # Combine branch name with run identifiers
+                TAG_NAME="${CLEAN_BRANCH}-b${{ github.run_number }}-${{ github.run_attempt }}"
+                
+                echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+
+          # Create a unique GitHub Release and upload the APK
           - name: Create Release and Upload APK
             id: create-release
             uses: ncipollo/release-action@v1
             with:
               artifacts: "./app/build/outputs/apk/debug/app-debug.apk"
-              tag: ${{ env.RELEASE_TAG }}
-              name: "PR Build #${{ github.run_number }}"
-              body: "Debug build generated automatically from PR #${{ github.event.pull_request.number }}."
+              tag: ${{ steps.generate-tag.outputs.tag }}
+              name: "PR Build: ${{ github.head_ref || github.ref_name }}"
+              body: "Debug build generated automatically from branch: ${{ github.head_ref || github.ref_name }}."
               prerelease: true
               draft: false
 
