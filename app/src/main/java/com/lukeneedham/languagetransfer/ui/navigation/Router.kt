@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.lukeneedham.common.ui.CrashesPage
+import com.lukeneedham.common.ui.LogsPage
 import com.lukeneedham.languagetransfer.ui.feature.debug.DebugPage
+import com.lukeneedham.languagetransfer.ui.feature.settings.SettingsPage
 import com.lukeneedham.languagetransfer.ui.feature.downloadlanguage.DownloadLanguagePage
 import com.lukeneedham.languagetransfer.ui.feature.home.HomePage
 import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonPage
@@ -90,8 +93,8 @@ fun Router() {
                         onLessonClick = { lesson ->
                             navController.navigate(Page.Lesson(lesson))
                         },
-                        onDebugClick = {
-                            navController.navigate(Page.Debug)
+                        onSettingsClick = {
+                            navController.navigate(Page.Settings)
                         }
                     )
                 }
@@ -104,9 +107,29 @@ fun Router() {
                     )
                 }
 
+                is Page.Settings -> {
+                    SettingsPage(
+                        onBack = onBack,
+                        onOpenDebug = { navController.navigate(Page.Debug) },
+                    )
+                }
+
+                is Page.CommonDebug -> {
+                    com.lukeneedham.common.ui.DebugPage(
+                        onBack = onBack,
+                        onOpenLogs = { navController.navigate(Page.Logs) },
+                        onOpenCrashes = { navController.navigate(Page.Crashes) },
+                    )
+                }
+
+                is Page.Logs -> LogsPage(onBack = onBack)
+
+                is Page.Crashes -> CrashesPage(onBack = onBack)
+
                 is Page.Debug -> {
                     DebugPage(
                         onBack = onBack,
+                        openCommonDebug = { navController.navigate(Page.CommonDebug) },
                         openStartup = { navController.navigate(Page.Startup) },
                         openCourseDownload = { navController.navigate(Page.CourseDownload) },
                         openHome = { navController.navigate(Page.Home) },

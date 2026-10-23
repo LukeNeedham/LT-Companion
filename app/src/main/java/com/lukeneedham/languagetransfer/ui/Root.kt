@@ -1,12 +1,17 @@
 package com.lukeneedham.languagetransfer.ui
 
 import androidx.compose.runtime.Composable
+import com.lukeneedham.common.ui.DebugTheme
+import com.lukeneedham.common.ui.ProvideDebugSettings
 import com.lukeneedham.languagetransfer.ui.navigation.Router
+import com.lukeneedham.languagetransfer.ui.theme.Colors
 import com.lukeneedham.languagetransfer.ui.theme.LanguageTransferTheme
 
 @Composable
 fun Root() {
     LanguageTransferTheme {
-        Router()
+        ProvideDebugSettings(theme = DebugTheme(background = Colors.background)) {
+            Router()
+        }
     }
 }

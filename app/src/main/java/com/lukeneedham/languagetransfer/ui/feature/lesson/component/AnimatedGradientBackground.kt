@@ -1,5 +1,7 @@
 package com.lukeneedham.languagetransfer.ui.feature.lesson.component
 
+import com.lukeneedham.common.debug.scale
+import com.lukeneedham.common.ui.LocalAnimationSpeed
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
@@ -44,11 +46,13 @@ fun AnimatedGradientBackground(
         }
     }
 
+    val animationSpeed = LocalAnimationSpeed.current
+
     // Animate each color in the list when colors param changes
     val animatedColors = colors.map { targetColor ->
         animateColorAsState(
             targetValue = targetColor,
-            animationSpec = tween(durationMillis = 1000),
+            animationSpec = tween(durationMillis = animationSpeed.scale(1000)),
             label = "colorAnimation"
         ).value
     }
@@ -61,7 +65,7 @@ fun AnimatedGradientBackground(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 10000, easing = LinearEasing),
+            animation = tween(durationMillis = animationSpeed.scale(10000), easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "xPosition"
@@ -72,7 +76,7 @@ fun AnimatedGradientBackground(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 15000, easing = LinearEasing),
+            animation = tween(durationMillis = animationSpeed.scale(15000), easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "yPosition"
@@ -83,7 +87,7 @@ fun AnimatedGradientBackground(
         initialValue = 0.5f,
         targetValue = 1.5f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 20000, easing = LinearEasing),
+            animation = tween(durationMillis = animationSpeed.scale(20000), easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "size"

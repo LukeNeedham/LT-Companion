@@ -1,5 +1,7 @@
 package com.lukeneedham.languagetransfer.ui.feature.lesson.component
 
+import com.lukeneedham.common.debug.scale
+import com.lukeneedham.common.ui.LocalAnimationSpeed
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -109,19 +111,20 @@ fun LessonPageBelowButtonContent(
 
         Spacer(modifier = Modifier.weight(1f))
 
+        val animationSpeed = LocalAnimationSpeed.current
         AnimatedNullableVisibility(
             item = durationBarData,
             transitionSpec = {
                 // Entrance: Slide UP from bottom (+height to 0)
                 val entrance = slideInVertically(
                     initialOffsetY = { height -> height },
-                    animationSpec = tween(600)
+                    animationSpec = tween(animationSpeed.scale(600))
                 )
 
                 // Exit: Slide DOWN to bottom (0 to +height)
                 val exit = slideOutVertically(
                     targetOffsetY = { height -> height },
-                    animationSpec = tween(600)
+                    animationSpec = tween(animationSpeed.scale(600))
                 )
 
                 entrance.togetherWith(exit)

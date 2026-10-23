@@ -37,12 +37,12 @@ import org.koin.androidx.compose.koinViewModel
  *
  * @param onLessonClick Callback to be invoked when a lesson is clicked
  * @param viewModel The view model for this page
- * @param onDebugClick Callback to be invoked when the Debug button is clicked
+ * @param onSettingsClick Callback to be invoked when the Settings button is clicked
  */
 @Composable
 fun HomePage(
     onLessonClick: (CourseLesson) -> Unit,
-    onDebugClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val lessonListState = rememberLazyListState()
@@ -84,11 +84,11 @@ fun HomePage(
                 modifier = Modifier
                     .size(50.dp)
                     .clip(CircleShape)
-                    .clickable { onDebugClick() }
+                    .clickable { onSettingsClick() }
             ) {
                 Image(
                     painter = painterResource(R.drawable.ic_debug),
-                    contentDescription = "Debug",
+                    contentDescription = "Settings",
                     modifier = Modifier.height(30.dp)
                 )
             }

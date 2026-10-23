@@ -1,6 +1,9 @@
 package com.lukeneedham.languagetransfer
 
 import android.app.Application
+import com.lukeneedham.common.DebugKit
+import com.lukeneedham.common.DebugKitConfig
+import com.lukeneedham.languagetransfer.BuildConfig
 import com.lukeneedham.languagetransfer.di.KoinModules
 import com.lukeneedham.languagetransfer.ui.util.sfx.AppSoundEffectPlayer
 import org.koin.android.ext.android.get
@@ -15,6 +18,9 @@ import org.koin.core.logger.Level
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
+
+        // First, so that Logger and the crash handler are ready before anything else runs
+        DebugKit.init(DebugKitConfig(enabled = BuildConfig.DEBUG))
 
         // Initialize Koin
         startKoin {
