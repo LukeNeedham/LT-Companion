@@ -1,7 +1,7 @@
 package com.lukeneedham.languagetransfer.data.repository
 
 import android.media.MediaMetadataRetriever
-import android.util.Log
+import com.lukeneedham.common.logger.Logger
 import com.lukeneedham.languagetransfer.data.network.LanguageDownloadRepository
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
 import com.lukeneedham.languagetransfer.domain.model.LanguageCourse
@@ -55,7 +55,7 @@ class AudioLessonRepository(
                 val lessonNameMap: Map<String, String> = when (lessonNamesResult) {
                     is AppResult.Success -> lessonNamesResult.value.associate { it.lessonId to it.lessonName }
                     is AppResult.Failure -> {
-                        Log.e("AudioLessonRepository", "Failed to load lesson names: ${lessonNamesResult.error}")
+                        Logger.e(tag = "AudioLessonRepository", message = "Failed to load lesson names: ${lessonNamesResult.error}")
                         emptyMap()
                     }
                 }
@@ -65,7 +65,7 @@ class AudioLessonRepository(
                     val lessonFileName = file.name
                     val lessonPausepoints = languagePausePoints.audioToPausepoints[lessonFileName]
                     if (lessonPausepoints == null) {
-                        Log.e("AudioLessonRepository", "No pausepoints for $lessonFileName")
+                        Logger.e(tag = "AudioLessonRepository", message = "No pausepoints for $lessonFileName")
                         return@mapIndexedNotNull null
                     }
 
@@ -119,7 +119,7 @@ class AudioLessonRepository(
 
             durationStr?.toLong() ?: 0
         } catch (e: Exception) {
-            Log.e("AudioLessonRepository", "Error extracting duration: ${e.message}")
+            Logger.e(tag = "AudioLessonRepository", message = "Error extracting duration: ${e.message}")
             0
         }
     }

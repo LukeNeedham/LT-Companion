@@ -1,6 +1,6 @@
 package com.lukeneedham.languagetransfer.domain.pausepointreport
 
-import android.util.Log
+import com.lukeneedham.common.logger.Logger
 import com.lukeneedham.languagetransfer.data.persistence.prefs.PausepointModificationsDao
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
 import com.lukeneedham.languagetransfer.util.model.Millis
@@ -70,7 +70,7 @@ class LessonPausepointProvider(
         newPps.block()
         newPps.sort()
         modifiedPausepoints.value = newPps
-        Log.e("LessonPausepointReport", "New pausepoints: $newPps")
+        Logger.e(tag = "LessonPausepointReport", message = "New pausepoints: $newPps")
         pausepointModificationsDao.setModifiedPausepoints(lessonName, newPps)
     }
 
