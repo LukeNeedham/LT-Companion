@@ -1,5 +1,7 @@
 package com.lukeneedham.languagetransfer.ui.feature.common
 
+import com.lukeneedham.common.debug.scale
+import com.lukeneedham.common.ui.LocalAnimationSpeed
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.animation.core.tween
@@ -76,10 +78,11 @@ fun LessonHeader(
             contentAlignment = Alignment.Center,
             modifier = Modifier.weight(1f)
         ) {
+            val animationSpeed = LocalAnimationSpeed.current
             AnimatedContent(
                 targetState = lessonNumber,
                 transitionSpec = {
-                    val spec = tween<IntOffset>(durationMillis = 1000)
+                    val spec = tween<IntOffset>(durationMillis = animationSpeed.scale(1000))
                     val entrance =
                         slideIntoContainer(towards = SlideDirection.Up, animationSpec = spec)
                     val exit =
