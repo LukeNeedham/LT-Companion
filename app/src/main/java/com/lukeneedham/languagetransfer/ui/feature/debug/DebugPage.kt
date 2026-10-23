@@ -46,6 +46,7 @@ import java.io.File
 @Composable
 fun DebugPage(
     onBack: () -> Unit,
+    openCommonDebug: () -> Unit,
     openStartup: () -> Unit,
     openCourseDownload: () -> Unit,
     openHome: () -> Unit,
@@ -112,6 +113,12 @@ fun DebugPage(
         Column(
             modifier = Modifier.padding(horizontal = 20.dp)
         ) {
+            Button(onClick = openCommonDebug) {
+                Text("Common debug (logs, crashes, app info)")
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
             SettingsSection(viewModel = viewModel)
 
             Spacer(modifier = Modifier.height(30.dp))

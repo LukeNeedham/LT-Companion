@@ -27,9 +27,23 @@ sealed interface Page : Parcelable {
     data class Lesson(val lesson: CourseLesson) : Page
 
     /**
+     * The settings page. Holds the button that opens the debug page.
+     */
+    object Settings : Page
+
+    /**
      * The debug page for navigating to any other page.
      */
     object Debug : Page
+
+    /** The shared library's debug page: app info and animation speed. */
+    object CommonDebug : Page
+
+    /** The shared library's log viewer. */
+    object Logs : Page
+
+    /** The shared library's crash viewer. */
+    object Crashes : Page
 
     enum class Animation {
         None,
