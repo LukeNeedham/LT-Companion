@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lukeneedham.common.ui.DebugButton
@@ -37,6 +38,14 @@ import com.lukeneedham.languagetransfer.ui.util.SystemBarsColor
  */
 @Composable
 fun SettingsPage(
+    onBack: () -> Unit,
+    onOpenDebug: () -> Unit,
+) {
+    SettingsPageContent(onBack = onBack, onOpenDebug = onOpenDebug)
+}
+
+@Composable
+internal fun SettingsPageContent(
     onBack: () -> Unit,
     onOpenDebug: () -> Unit,
 ) {
@@ -81,4 +90,10 @@ fun SettingsPage(
             DebugButton(onClick = onOpenDebug)
         }
     }
+}
+
+@Preview
+@Composable
+private fun Preview() {
+    SettingsPageContent(onBack = {}, onOpenDebug = {})
 }

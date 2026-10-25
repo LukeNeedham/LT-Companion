@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.lukeneedham.languagetransfer.ui.util.SystemBarsColor
 import org.koin.androidx.compose.koinViewModel
@@ -21,6 +22,19 @@ import org.koin.androidx.compose.koinViewModel
 fun DownloadLanguagePage(
     onContinue: () -> Unit,
     viewModel: DownloadLanguageViewModel = koinViewModel(),
+) {
+    DownloadLanguagePageContent(
+        state = viewModel.state,
+        onDownload = viewModel::download,
+        onContinue = onContinue,
+    )
+}
+
+@Composable
+internal fun DownloadLanguagePageContent(
+    state: DownloadLanguageState,
+    onDownload: () -> Unit,
+    onContinue: () -> Unit,
 ) {
     SystemBarsColor(useDarkIcons = true)
 
@@ -31,7 +45,6 @@ fun DownloadLanguagePage(
             .fillMaxSize()
             .padding(20.dp)
     ) {
-        val state = viewModel.state
         when (state) {
             DownloadLanguageState.Done -> {
                 Text(text = "Download completed!")
@@ -49,7 +62,7 @@ fun DownloadLanguagePage(
                 Text(text = "Download failed!")
                 Button(
                     onClick = {
-                        viewModel.download()
+                        onDownload()
                     },
                     modifier = Modifier.padding(16.dp)
                 ) {
@@ -70,7 +83,7 @@ fun DownloadLanguagePage(
                 Text(text = "Ready to download spanish course")
                 Button(
                     onClick = {
-                        viewModel.download()
+                        onDownload()
                     },
                     modifier = Modifier.padding(16.dp)
                 ) {
@@ -79,4 +92,14 @@ fun DownloadLanguagePage(
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun Preview() {
+    DownloadLanguagePageContent(
+        state = DownloadLanguageState.Ready,
+        onDownload = {},
+        onContinue = {},
+    )
 }

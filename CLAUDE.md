@@ -69,7 +69,7 @@ ui/
   feature/        - One package per screen/feature (home, lesson, startup,
                     downloadlanguage, debug), each typically with
                     Page (Composable), ViewModel, and State
-  navigation/     - Page (sealed nav destinations) + Router (NavHost)
+  navigation/     - NavKeys (sealed nav destinations) + Router (NavHost)
   player/         - Audio playback abstraction (AudioPlayer, PlaybackRepository,
                     AudioMediaService for the media notification)
   theme/          - Compose theme, colors, typography
@@ -94,12 +94,13 @@ util/
 
 ### Navigation
 
-- `Page` (`ui/navigation/Page.kt`) is a `@Parcelize sealed interface` listing every screen:
-  `Startup`, `CourseDownload`, `Home`, `Lesson(lesson: CourseLesson)`, `Debug`.
-- `Router` (`ui/navigation/Router.kt`) hosts an `AnimatedNavHost` and maps each `Page` to its
+- `AppNavKey` (`ui/navigation/NavKeys.kt`) is a `@Parcelize sealed interface` listing every screen as an `XNavKey`:
+  `StartupNavKey`, `CourseDownloadNavKey`, `HomeNavKey`, `LessonNavKey(lesson: CourseLesson)`, `SettingsNavKey`,
+  `AppDebugNavKey`, plus the library's `DebugNavKey`, `LogsNavKey` and `CrashesNavKey`.
+- `Router` (`ui/navigation/Router.kt`) hosts an `AnimatedNavHost` and maps each nav key to its
   Composable, wiring up navigation callbacks (`onLessonClick`, `onBack`, etc.).
-- Add a new screen by: adding a `Page` variant, a feature package under `ui/feature/`, wiring it
-  into `Router`, and registering its ViewModel in `KoinModules`.
+- Add a new screen by: adding an `XNavKey`, a feature package under `ui/feature/` with an `XPage` (gets the ViewModel)
+  and a stateless `internal XPageContent`, wiring it into `Router`, and registering its ViewModel in `KoinModules`.
 
 ### DI (Koin)
 
@@ -141,7 +142,7 @@ injection:
 - `util/DebugOptions.kt` centralizes debug flags (`allLessonsCompleted`,
   `showDebugLessonControls`, `shouldAutoPause`, `allowSeekProgressBar`), backed by
   `PrefsBooleanKey` / `DebugPreferencesDao` (DataStore).
-- `ui/feature/debug/DebugPage.kt` + `DebugViewModel` provide an in-app debug menu for toggling
+- `ui/feature/debug/AppDebugPage.kt` + `DebugViewModel` provide an in-app debug menu for toggling
   these flags and navigating directly to any `Page` (including a dummy lesson).
 - `PausepointReporter` / `domain/pausepointreport` let users report inaccurate pausepoints
   (missing, unnecessary, too early/late) from within a lesson, which is recorded for later
@@ -169,7 +170,7 @@ adjust pausepoint/lesson-name data.
   purpose and `@property`/`@param`/`@return` — follow this style for new public API in
   `data`/`domain`/`util`.
 - Sealed classes/interfaces for state and results (`HomeState`, `LessonState`, `AppResult`,
-  `Page`, `PrefsBooleanKey`, etc.) rather than booleans/enums with implicit meaning.
+  `AppNavKey`, `PrefsBooleanKey`, etc.) rather than booleans/enums with implicit meaning.
 - Repository constructors take their dependencies (other repositories/DAOs), never `Context`
   directly except where unavoidable (e.g. `LanguageDownloadRepository`, `FileDownloader`,
   `PausePointsRepository` use `androidContext()` from Koin for assets/files dir).

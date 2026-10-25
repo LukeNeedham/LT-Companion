@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lukeneedham.languagetransfer.R
@@ -36,7 +38,6 @@ import org.koin.androidx.compose.koinViewModel
  * Home page where users can access the downloaded courses.
  *
  * @param onLessonClick Callback to be invoked when a lesson is clicked
- * @param viewModel The view model for this page
  * @param onSettingsClick Callback to be invoked when the Settings button is clicked
  */
 @Composable
@@ -46,9 +47,6 @@ fun HomePage(
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val lessonListState = rememberLazyListState()
-    val state = viewModel.uiState
-
-    SystemBarsColor(useDarkIcons = true)
 
     LaunchedEffect(Unit) {
         // Auto scroll to current item
@@ -56,6 +54,23 @@ fun HomePage(
             lessonListState.animateScrollToItem(it)
         }
     }
+
+    HomePageContent(
+        state = viewModel.uiState,
+        lessonListState = lessonListState,
+        onLessonClick = onLessonClick,
+        onSettingsClick = onSettingsClick,
+    )
+}
+
+@Composable
+internal fun HomePageContent(
+    state: HomeState,
+    lessonListState: LazyListState,
+    onLessonClick: (CourseLesson) -> Unit,
+    onSettingsClick: () -> Unit,
+) {
+    SystemBarsColor(useDarkIcons = true)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -106,4 +121,15 @@ fun HomePage(
             )
         }
     }
+}
+
+@Preview
+@Composable
+private fun Preview() {
+    HomePageContent(
+        state = HomeState.Loading,
+        lessonListState = rememberLazyListState(),
+        onLessonClick = {},
+        onSettingsClick = {},
+    )
 }
