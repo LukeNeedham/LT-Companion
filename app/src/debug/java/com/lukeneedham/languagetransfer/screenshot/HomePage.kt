@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
 import com.lukeneedham.languagetransfer.ui.feature.home.HomePageContent
-import com.lukeneedham.languagetransfer.ui.feature.home.HomeState
+import com.lukeneedham.languagetransfer.ui.feature.home.HomeUiState
 import com.lukeneedham.languagetransfer.ui.feature.home.model.HomeLessonItem
 import com.lukeneedham.languagetransfer.ui.util.color.ColorScheme
 import java.io.File
@@ -24,7 +24,7 @@ private fun HomePageScreenshot() {
         colorScheme = ColorScheme(colors),
     )
     HomePageContent(
-        state = HomeState.Success(
+        state = HomeUiState.Success(
             lessons = listOf(
                 HomeLessonItem(lesson(1, "Course Introduction", listOf(0xFFFF6B6B, 0xFFFECE00)), HomeLessonItem.Progress.Completed, hasBookmark = false),
                 HomeLessonItem(lesson(2, "Making Sentences", listOf(0xFF7B00FF, 0xFFFF00FF)), HomeLessonItem.Progress.Completed, hasBookmark = false),

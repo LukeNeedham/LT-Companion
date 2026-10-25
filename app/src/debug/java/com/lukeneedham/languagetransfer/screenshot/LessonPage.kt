@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
 import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonPageContent
-import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonState
+import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonUiState
 import com.lukeneedham.languagetransfer.ui.feature.lesson.pausepointreport.PausepointReporter
 import com.lukeneedham.languagetransfer.ui.player.PlayingState
 import com.lukeneedham.languagetransfer.ui.util.color.ColorScheme
@@ -25,7 +25,7 @@ private fun LessonPageScreenshot() {
     )
     LessonPageContent(
         lesson = lesson,
-        uiState = LessonState.InProgress(
+        uiState = LessonUiState.InProgress(
             currentPosition = lesson.totalDuration / 2,
             totalDuration = lesson.totalDuration,
             playingState = PlayingState.Playing,

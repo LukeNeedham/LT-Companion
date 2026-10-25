@@ -7,27 +7,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.lukeneedham.languagetransfer.R
 import com.lukeneedham.languagetransfer.ui.feature.common.CutOutGlassyButton
-import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonState
+import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonUiState
 import com.lukeneedham.languagetransfer.ui.feature.lesson.state.LessonPlayButton
 import com.lukeneedham.languagetransfer.ui.player.PlayingState
 
 
 @Composable
 fun LessonPageMainButton(
-    state: LessonState,
+    state: LessonUiState,
     onClick: () -> Unit,
 ) {
     when (state) {
-        is LessonState.Loading -> {
+        is LessonUiState.Loading -> {
             LessonPlayButton(onClick = {}, isPaused = false)
         }
 
-        is LessonState.InProgress -> {
+        is LessonUiState.InProgress -> {
             val isPaused = state.playingState is PlayingState.Paused
             LessonPlayButton(onClick = onClick, isPaused = isPaused)
         }
 
-        is LessonState.Completed -> {
+        is LessonUiState.Completed -> {
             if (!state.hasCompletedCourse) {
                 LessonPlayButton(onClick = onClick, isPaused = true)
             } else {
@@ -41,7 +41,7 @@ fun LessonPageMainButton(
             }
         }
 
-        is LessonState.Error -> {
+        is LessonUiState.Error -> {
             CutOutGlassyButton(
                 painter = painterResource(R.drawable.ic_error),
                 contentDescription = null,

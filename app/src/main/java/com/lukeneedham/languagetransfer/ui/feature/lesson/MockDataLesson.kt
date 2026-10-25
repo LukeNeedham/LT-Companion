@@ -21,7 +21,7 @@ object MockDataLesson {
         colorScheme = colorScheme
     )
 
-    val state = LessonState.InProgress(
+    val state = LessonUiState.InProgress(
         currentPosition = lesson.totalDuration / 2,
         totalDuration = lesson.totalDuration,
         playingState = PlayingState.Playing,

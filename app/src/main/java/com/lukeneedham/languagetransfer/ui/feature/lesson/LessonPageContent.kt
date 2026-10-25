@@ -13,7 +13,7 @@ import com.lukeneedham.languagetransfer.ui.util.color.ext.toComposeColors
 @Composable
 internal fun LessonPageContent(
     lesson: CourseLesson,
-    uiState: LessonState,
+    uiState: LessonUiState,
     showDebugLessonControls: Boolean,
     onBack: () -> Unit,
     onMainButtonClick: () -> Unit,

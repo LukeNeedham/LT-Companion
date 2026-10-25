@@ -28,8 +28,8 @@ import dev.olshevski.navigation.reimagined.rememberNavController
 
 @Composable
 fun Router() {
-    val navController = rememberNavController<AppNavKey>(
-        startDestination = StartupNavKey
+    val navController = rememberNavController<Route>(
+        startDestination = Route.Startup
     )
 
     val onBack: () -> Unit = {
@@ -60,46 +60,46 @@ fun Router() {
                     )
 
                 return@AnimatedNavHost when {
-                    to is StartupNavKey -> none
-                    from is StartupNavKey -> none
+                    to is Route.Startup -> none
+                    from is Route.Startup -> none
                     else -> slide
                 }
             },
         ) { page ->
             when (page) {
-                is StartupNavKey -> {
+                is Route.Startup -> {
                     StartupPage(
                         continueToHome = {
                             navController.popAll()
-                            navController.navigate(HomeNavKey)
+                            navController.navigate(Route.Home)
                         },
                         continueToCourseDownload = {
                             navController.popAll()
-                            navController.navigate(CourseDownloadNavKey)
+                            navController.navigate(Route.CourseDownload)
                         },
                     )
                 }
 
-                is CourseDownloadNavKey -> {
+                is Route.CourseDownload -> {
                     DownloadLanguagePage(
                         onContinue = {
-                            navController.navigate(HomeNavKey)
+                            navController.navigate(Route.Home)
                         }
                     )
                 }
 
-                is HomeNavKey -> {
+                is Route.Home -> {
                     HomePage(
                         onLessonClick = { lesson ->
-                            navController.navigate(LessonNavKey(lesson))
+                            navController.navigate(Route.Lesson(lesson))
                         },
                         onSettingsClick = {
-                            navController.navigate(SettingsNavKey)
+                            navController.navigate(Route.Settings)
                         }
                     )
                 }
 
-                is LessonNavKey -> {
+                is Route.Lesson -> {
                     val lesson = page.lesson
                     LessonPage(
                         initialLesson = lesson,
@@ -107,33 +107,33 @@ fun Router() {
                     )
                 }
 
-                is SettingsNavKey -> {
+                is Route.Settings -> {
                     SettingsPage(
                         onBack = onBack,
-                        onOpenDebug = { navController.navigate(AppDebugNavKey) },
+                        onOpenDebug = { navController.navigate(Route.AppDebug) },
                     )
                 }
 
-                is DebugNavKey -> {
+                is Route.Debug -> {
                     com.lukeneedham.common.ui.DebugPage(
                         onBack = onBack,
-                        onOpenLogs = { navController.navigate(LogsNavKey) },
-                        onOpenCrashes = { navController.navigate(CrashesNavKey) },
+                        onOpenLogs = { navController.navigate(Route.Logs) },
+                        onOpenCrashes = { navController.navigate(Route.Crashes) },
                     )
                 }
 
-                is LogsNavKey -> LogsPage(onBack = onBack)
+                is Route.Logs -> LogsPage(onBack = onBack)
 
-                is CrashesNavKey -> CrashesPage(onBack = onBack)
+                is Route.Crashes -> CrashesPage(onBack = onBack)
 
-                is AppDebugNavKey -> {
+                is Route.AppDebug -> {
                     AppDebugPage(
                         onBack = onBack,
-                        openCommonDebug = { navController.navigate(DebugNavKey) },
-                        openStartup = { navController.navigate(StartupNavKey) },
-                        openCourseDownload = { navController.navigate(CourseDownloadNavKey) },
-                        openHome = { navController.navigate(HomeNavKey) },
-                        openLesson = { lesson -> navController.navigate(LessonNavKey(lesson)) }
+                        openCommonDebug = { navController.navigate(Route.Debug) },
+                        openStartup = { navController.navigate(Route.Startup) },
+                        openCourseDownload = { navController.navigate(Route.CourseDownload) },
+                        openHome = { navController.navigate(Route.Home) },
+                        openLesson = { lesson -> navController.navigate(Route.Lesson(lesson)) }
                     )
                 }
             }

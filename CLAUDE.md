@@ -69,7 +69,7 @@ ui/
   feature/        - One package per screen/feature (home, lesson, startup,
                     downloadlanguage, debug), each typically with
                     Page (Composable), ViewModel, and State
-  navigation/     - NavKeys (sealed nav destinations) + Router (NavHost)
+  navigation/     - Route (sealed nav destinations) + Router (NavHost)
   player/         - Audio playback abstraction (AudioPlayer, PlaybackRepository,
                     AudioMediaService for the media notification)
   theme/          - Compose theme, colors, typography
@@ -94,13 +94,14 @@ util/
 
 ### Navigation
 
-- `AppNavKey` (`ui/navigation/NavKeys.kt`) is a `@Parcelize sealed interface` listing every screen as an `XNavKey`:
-  `StartupNavKey`, `CourseDownloadNavKey`, `HomeNavKey`, `LessonNavKey(lesson: CourseLesson)`, `SettingsNavKey`,
-  `AppDebugNavKey`, plus the library's `DebugNavKey`, `LogsNavKey` and `CrashesNavKey`.
-- `Router` (`ui/navigation/Router.kt`) hosts an `AnimatedNavHost` and maps each nav key to its
+- `Route` (`ui/navigation/Route.kt`) is a `@Parcelize sealed interface` with one member per screen, so `Route.Home` is
+  `HomePage`: `Route.Startup`, `Route.CourseDownload`, `Route.Home`, `Route.Lesson(lesson: CourseLesson)`, `Route.Settings`,
+  `Route.AppDebug`, plus the library's `Route.Debug`, `Route.Logs` and `Route.Crashes`.
+- `Router` (`ui/navigation/Router.kt`) hosts an `AnimatedNavHost` and maps each route to its
   Composable, wiring up navigation callbacks (`onLessonClick`, `onBack`, etc.).
-- Add a new screen by: adding an `XNavKey`, a feature package under `ui/feature/` with an `XPage` (gets the ViewModel)
-  and a stateless `internal XPageContent`, wiring it into `Router`, and registering its ViewModel in `KoinModules`.
+- Add a new screen by: adding a member of `Route`, a feature package under `ui/feature/` with an `XPage` (gets the ViewModel)
+  and a stateless `internal XPageContent`, each in its own file with its `XViewModel` and `XUiState`, wiring it into `Router`,
+  and registering its ViewModel in `KoinModules`.
 
 ### DI (Koin)
 
@@ -169,8 +170,8 @@ adjust pausepoint/lesson-name data.
 - KDoc-style comments (`/** ... */`) are used on most public classes/functions describing
   purpose and `@property`/`@param`/`@return` — follow this style for new public API in
   `data`/`domain`/`util`.
-- Sealed classes/interfaces for state and results (`HomeState`, `LessonState`, `AppResult`,
-  `AppNavKey`, `PrefsBooleanKey`, etc.) rather than booleans/enums with implicit meaning.
+- Sealed classes/interfaces for state and results (`HomeUiState`, `LessonUiState`, `AppResult`,
+  `Route`, `PrefsBooleanKey`, etc.) rather than booleans/enums with implicit meaning.
 - Repository constructors take their dependencies (other repositories/DAOs), never `Context`
   directly except where unavoidable (e.g. `LanguageDownloadRepository`, `FileDownloader`,
   `PausePointsRepository` use `androidContext()` from Koin for assets/files dir).

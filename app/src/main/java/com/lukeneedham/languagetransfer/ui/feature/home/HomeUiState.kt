@@ -5,21 +5,21 @@ import com.lukeneedham.languagetransfer.ui.feature.home.model.HomeLessonItem
 /**
  * Represents the current state of the Home screen UI.
  */
-sealed class HomeState {
+sealed class HomeUiState {
     /**
      * Initial loading state.
      */
-    object Loading : HomeState()
+    object Loading : HomeUiState()
 
     /**
      * Success state with loaded language course data.
      */
     data class Success(
         val lessons: List<HomeLessonItem>,
-    ) : HomeState()
+    ) : HomeUiState()
 
     /**
      * Error state with error message.
      */
-    data class Error(val message: String) : HomeState()
+    data class Error(val message: String) : HomeUiState()
 }

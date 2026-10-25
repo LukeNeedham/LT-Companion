@@ -35,7 +35,7 @@ class LessonViewModel(
     private val onBackMutable = EventChannel()
     val onBack = onBackMutable.flow
 
-    var uiState by mutableStateOf<LessonState>(LessonState.Loading)
+    var uiState by mutableStateOf<LessonUiState>(LessonUiState.Loading)
         private set
 
     var showDebugLessonControls by mutableStateOf(false)
@@ -74,13 +74,13 @@ class LessonViewModel(
         viewModelScope.launch {
             playbackRepository.resumeChannel.collect {
                 when (uiState) {
-                    is LessonState.Completed -> {
+                    is LessonUiState.Completed -> {
                         continueToNextLesson()
                     }
 
-                    is LessonState.Error,
-                    is LessonState.InProgress,
-                    LessonState.Loading -> {
+                    is LessonUiState.Error,
+                    is LessonUiState.InProgress,
+                    LessonUiState.Loading -> {
                         // Nothing to do
                     }
                 }
@@ -116,12 +116,12 @@ class LessonViewModel(
     fun onMainButtonClick() {
         val state = uiState
         when (state) {
-            is LessonState.Error,
-            LessonState.Loading -> {
+            is LessonUiState.Error,
+            LessonUiState.Loading -> {
                 // Ignore
             }
 
-            is LessonState.InProgress -> {
+            is LessonUiState.InProgress -> {
                 // Toggle playback
                 when (state.playingState) {
                     is PlayingState.Playing -> specificLessonViewModel.pausePlayback()
@@ -129,7 +129,7 @@ class LessonViewModel(
                 }
             }
 
-            is LessonState.Completed -> {
+            is LessonUiState.Completed -> {
                 // Go to next lesson, or back to home if completed
                 if (state.hasCompletedCourse) {
                     onBack()

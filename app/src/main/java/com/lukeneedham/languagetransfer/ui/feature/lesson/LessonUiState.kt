@@ -6,11 +6,11 @@ import com.lukeneedham.languagetransfer.util.model.Millis
 /**
  * Represents the different states of the lesson playback.
  */
-sealed interface LessonState {
+sealed interface LessonUiState {
     /**
      * State when a lesson is being loaded.
      */
-    object Loading : LessonState
+    object Loading : LessonUiState
 
     data class InProgress(
         val currentPosition: Millis,
@@ -18,17 +18,17 @@ sealed interface LessonState {
         val playingState: PlayingState,
         val pausepointFractions: List<Float>,
         val playbackSpeed: Float,
-    ) : LessonState
+    ) : LessonUiState
 
     /**
      * State when an error occurs during playback.
      */
-    data class Error(val message: String) : LessonState
+    data class Error(val message: String) : LessonUiState
 
     /**
      * State when a lesson is completed.
      */
     data class Completed(
         val hasCompletedCourse: Boolean,
-    ) : LessonState
+    ) : LessonUiState
 }
