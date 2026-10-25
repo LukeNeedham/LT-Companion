@@ -17,10 +17,8 @@ you can report a pausepoint that is missing, unnecessary, too early or too late 
 
 ## Screenshots
 
-<img src="docs/screenshots/01-DownloadLanguagePage.png" width="240" alt="Download Language Page">
-<img src="docs/screenshots/02-HomePage.png" width="240" alt="Home Page">
-<img src="docs/screenshots/03-LessonPage.png" width="240" alt="Lesson Page">
-<img src="docs/screenshots/04-SettingsPage.png" width="240" alt="Settings Page">
+<img src="docs/screenshots/01-HomePage.png" width="240" alt="Home Page">
+<img src="docs/screenshots/02-LessonPage.png" width="240" alt="Lesson Page">
 
 ## Getting started as a user
 

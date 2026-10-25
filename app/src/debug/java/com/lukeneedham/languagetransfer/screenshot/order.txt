@@ -1,5 +1,3 @@
-# the order of the README: the download on first run, the lessons, a lesson, then settings
-DownloadLanguagePage
+# the order of the README
 HomePage
 LessonPage
-SettingsPage
