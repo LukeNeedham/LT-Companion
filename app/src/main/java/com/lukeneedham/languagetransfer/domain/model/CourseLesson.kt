@@ -3,7 +3,9 @@ package com.lukeneedham.languagetransfer.domain.model
 import android.os.Parcelable
 import com.lukeneedham.languagetransfer.ui.util.color.ColorScheme
 import com.lukeneedham.languagetransfer.util.model.Millis
+import com.lukeneedham.languagetransfer.util.FileAsPathSerializer
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import java.io.File
 
 /**
@@ -17,11 +19,13 @@ import java.io.File
  * @property totalDuration The duration of the audio file in milliseconds
  */
 @Parcelize
+@Serializable
 data class CourseLesson(
     val audioFileName: String,
     val lessonNumber: Int,
     val lessonName: String,
     val pausepoints: List<Millis>,
+    @Serializable(with = FileAsPathSerializer::class)
     val audioFile: File,
     val totalDuration: Millis,
     val colorScheme: ColorScheme,

@@ -18,7 +18,7 @@ before the recording continues.
 
 - **UI**: Jetpack Compose + Material3, custom theme (`ui/theme`)
 - **DI**: Koin (`di/KoinModules.kt`)
-- **Navigation**: [navigation-reimagined](https://github.com/olshevski/compose-navigation-reimagined) (`ui/navigation`)
+- **Navigation**: Navigation 3 (`androidx.navigation3`): `AppNavigation` owns the back stack and `NavDisplay`, `Router` is the exhaustive `when` over the sealed `Route` (`ui/navigation`; see `docs/app-shell.md` in `LukeNeedham/ci-workflows`)
 - **Networking**: Ktor client (downloading the course zip)
 - **Database**: Room (`data/persistence`)
 - **Preferences**: AndroxX DataStore (`data/persistence/prefs`)
