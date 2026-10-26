@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.lukeneedham.common.ui.CrashesPage
 import com.lukeneedham.common.ui.LogsPage
-import com.lukeneedham.languagetransfer.ui.feature.debug.DebugPage
+import com.lukeneedham.languagetransfer.ui.feature.debug.AppDebugPage
 import com.lukeneedham.languagetransfer.ui.feature.settings.SettingsPage
 import com.lukeneedham.languagetransfer.ui.feature.downloadlanguage.DownloadLanguagePage
 import com.lukeneedham.languagetransfer.ui.feature.home.HomePage
@@ -28,8 +28,8 @@ import dev.olshevski.navigation.reimagined.rememberNavController
 
 @Composable
 fun Router() {
-    val navController = rememberNavController<Page>(
-        startDestination = Page.Startup
+    val navController = rememberNavController<Route>(
+        startDestination = Route.Startup
     )
 
     val onBack: () -> Unit = {
@@ -60,46 +60,46 @@ fun Router() {
                     )
 
                 return@AnimatedNavHost when {
-                    to is Page.Startup -> none
-                    from is Page.Startup -> none
+                    to is Route.Startup -> none
+                    from is Route.Startup -> none
                     else -> slide
                 }
             },
         ) { page ->
             when (page) {
-                is Page.Startup -> {
+                is Route.Startup -> {
                     StartupPage(
                         continueToHome = {
                             navController.popAll()
-                            navController.navigate(Page.Home)
+                            navController.navigate(Route.Home)
                         },
                         continueToCourseDownload = {
                             navController.popAll()
-                            navController.navigate(Page.CourseDownload)
+                            navController.navigate(Route.CourseDownload)
                         },
                     )
                 }
 
-                is Page.CourseDownload -> {
+                is Route.CourseDownload -> {
                     DownloadLanguagePage(
                         onContinue = {
-                            navController.navigate(Page.Home)
+                            navController.navigate(Route.Home)
                         }
                     )
                 }
 
-                is Page.Home -> {
+                is Route.Home -> {
                     HomePage(
                         onLessonClick = { lesson ->
-                            navController.navigate(Page.Lesson(lesson))
+                            navController.navigate(Route.Lesson(lesson))
                         },
                         onSettingsClick = {
-                            navController.navigate(Page.Settings)
+                            navController.navigate(Route.Settings)
                         }
                     )
                 }
 
-                is Page.Lesson -> {
+                is Route.Lesson -> {
                     val lesson = page.lesson
                     LessonPage(
                         initialLesson = lesson,
@@ -107,33 +107,33 @@ fun Router() {
                     )
                 }
 
-                is Page.Settings -> {
+                is Route.Settings -> {
                     SettingsPage(
                         onBack = onBack,
-                        onOpenDebug = { navController.navigate(Page.Debug) },
+                        onOpenDebug = { navController.navigate(Route.AppDebug) },
                     )
                 }
 
-                is Page.CommonDebug -> {
+                is Route.Debug -> {
                     com.lukeneedham.common.ui.DebugPage(
                         onBack = onBack,
-                        onOpenLogs = { navController.navigate(Page.Logs) },
-                        onOpenCrashes = { navController.navigate(Page.Crashes) },
+                        onOpenLogs = { navController.navigate(Route.Logs) },
+                        onOpenCrashes = { navController.navigate(Route.Crashes) },
                     )
                 }
 
-                is Page.Logs -> LogsPage(onBack = onBack)
+                is Route.Logs -> LogsPage(onBack = onBack)
 
-                is Page.Crashes -> CrashesPage(onBack = onBack)
+                is Route.Crashes -> CrashesPage(onBack = onBack)
 
-                is Page.Debug -> {
-                    DebugPage(
+                is Route.AppDebug -> {
+                    AppDebugPage(
                         onBack = onBack,
-                        openCommonDebug = { navController.navigate(Page.CommonDebug) },
-                        openStartup = { navController.navigate(Page.Startup) },
-                        openCourseDownload = { navController.navigate(Page.CourseDownload) },
-                        openHome = { navController.navigate(Page.Home) },
-                        openLesson = { lesson -> navController.navigate(Page.Lesson(lesson)) }
+                        openCommonDebug = { navController.navigate(Route.Debug) },
+                        openStartup = { navController.navigate(Route.Startup) },
+                        openCourseDownload = { navController.navigate(Route.CourseDownload) },
+                        openHome = { navController.navigate(Route.Home) },
+                        openLesson = { lesson -> navController.navigate(Route.Lesson(lesson)) }
                     )
                 }
             }

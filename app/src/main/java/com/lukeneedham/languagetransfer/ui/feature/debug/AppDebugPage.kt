@@ -44,7 +44,7 @@ import org.koin.androidx.compose.koinViewModel
 import java.io.File
 
 @Composable
-fun DebugPage(
+fun AppDebugPage(
     onBack: () -> Unit,
     openCommonDebug: () -> Unit,
     openStartup: () -> Unit,

@@ -30,7 +30,7 @@ class HomeViewModel(
     private var debugAllLessonsCompleted: Boolean = false
     private val courseResult = audioLessonRepository.getLanguageCourse()
 
-    var uiState by mutableStateOf<HomeState>(HomeState.Loading)
+    var uiState by mutableStateOf<HomeUiState>(HomeUiState.Loading)
         private set
 
     private val _scrollToLessonFlow = EventDataChannel<Int>()
@@ -52,7 +52,7 @@ class HomeViewModel(
         val newState = calculateUiState()
         uiState = newState
 
-        if (newState is HomeState.Success && oldState !is HomeState.Success) {
+        if (newState is HomeUiState.Success && oldState !is HomeUiState.Success) {
             val currentLessonIndex =
                 newState.lessons.indexOfFirst { it.progress == HomeLessonItem.Progress.Current }
             val scrollTo = if (currentLessonIndex == -1) 0 else currentLessonIndex
@@ -60,13 +60,13 @@ class HomeViewModel(
         }
     }
 
-    private fun calculateUiState(): HomeState {
+    private fun calculateUiState(): HomeUiState {
         val courseRes = courseResult
 
-        val completed = completedLessonNumbers ?: return HomeState.Loading
+        val completed = completedLessonNumbers ?: return HomeUiState.Loading
 
         return when (courseRes) {
-            is AppResult.Failure -> HomeState.Error(
+            is AppResult.Failure -> HomeUiState.Error(
                 courseRes.error.message ?: "Unknown error"
             )
 
@@ -107,7 +107,7 @@ class HomeViewModel(
                     )
                 }
 
-                HomeState.Success(lessons)
+                HomeUiState.Success(lessons)
             }
         }
     }

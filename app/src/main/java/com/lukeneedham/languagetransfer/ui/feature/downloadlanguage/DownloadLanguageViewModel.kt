@@ -12,23 +12,23 @@ import kotlinx.coroutines.launch
 class DownloadLanguageViewModel(
     private val languageDownloadRepository: LanguageDownloadRepository,
 ) : ViewModel() {
-    var state: DownloadLanguageState by mutableStateOf(DownloadLanguageState.Ready)
+    var state: DownloadLanguageUiState by mutableStateOf(DownloadLanguageUiState.Ready)
         private set
 
     fun download() {
         viewModelScope.launch {
-            state = DownloadLanguageState.InProgress(0f)
+            state = DownloadLanguageUiState.InProgress(0f)
             val res = languageDownloadRepository.downloadSpanishCourse(
                 onProgress = {
-                    state = DownloadLanguageState.InProgress(it)
+                    state = DownloadLanguageUiState.InProgress(it)
                 }
             )
             state = when (res) {
                 is AppResult.Failure -> {
-                    DownloadLanguageState.Failed(res.error.message ?: "")
+                    DownloadLanguageUiState.Failed(res.error.message ?: "")
                 }
 
-                is AppResult.Success -> DownloadLanguageState.Done
+                is AppResult.Success -> DownloadLanguageUiState.Done
             }
         }
     }

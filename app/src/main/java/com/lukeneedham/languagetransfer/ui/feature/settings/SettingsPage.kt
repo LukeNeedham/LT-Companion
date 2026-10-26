@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lukeneedham.common.ui.DebugButton
@@ -40,45 +41,5 @@ fun SettingsPage(
     onBack: () -> Unit,
     onOpenDebug: () -> Unit,
 ) {
-    SystemBarsColor(useDarkIcons = true)
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = Colors.background)
-            .systemBarsPadding()
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp)
-        ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(50.dp)
-                    .clip(CircleShape)
-                    .clickable { onBack() }
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.ic_close),
-                    contentDescription = "Close",
-                    modifier = Modifier.size(30.dp)
-                )
-            }
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(text = "Settings", fontSize = 25.sp, color = Color.Black)
-            }
-            Box(modifier = Modifier.size(50.dp))
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-            DebugButton(onClick = onOpenDebug)
-        }
-    }
+    SettingsPageContent(onBack = onBack, onOpenDebug = onOpenDebug)
 }

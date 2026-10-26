@@ -14,16 +14,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntOffset.Companion
 import com.lukeneedham.languagetransfer.ui.feature.common.LessonMessage
-import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonState
+import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonUiState
 import com.lukeneedham.languagetransfer.ui.player.PlayingState
 
 
 @Composable
 fun LessonPageAboveButtonContent(
-    state: LessonState,
+    state: LessonUiState,
 ) {
     val message = when (state) {
-        is LessonState.InProgress -> {
+        is LessonUiState.InProgress -> {
             val playingState = state.playingState
             when (playingState) {
                 is PlayingState.Paused -> when (playingState.reason) {
@@ -38,7 +38,7 @@ fun LessonPageAboveButtonContent(
             }
         }
 
-        is LessonState.Completed -> {
+        is LessonUiState.Completed -> {
             if (state.hasCompletedCourse) {
                 Message(
                     title = "Course completed!",
@@ -52,14 +52,14 @@ fun LessonPageAboveButtonContent(
             }
         }
 
-        is LessonState.Error -> {
+        is LessonUiState.Error -> {
             Message(
                 title = "Something went wrong",
                 message = state.message,
             )
         }
 
-        LessonState.Loading -> null
+        LessonUiState.Loading -> null
     }
 
     AnimatedContent(

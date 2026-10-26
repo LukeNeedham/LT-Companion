@@ -5,48 +5,42 @@ import com.lukeneedham.languagetransfer.domain.model.CourseLesson
 import kotlinx.parcelize.Parcelize
 
 /**
- * Sealed class representing the different navigation destinations in the app.
+ * The navigation destinations of the app, one per page: [Home] is `HomePage`, and so on.
  */
 @Parcelize
-sealed interface Page : Parcelable {
+sealed interface Route : Parcelable {
+    object Startup : Route
 
-    object Startup : Page
-
-    object CourseDownload : Page
+    object CourseDownload : Route
 
     /**
      * The home page where users can access the downloaded courses.
      */
-    object Home : Page
+    object Home : Route
 
     /**
      * The lesson page where users can play and interact with a specific lesson.
      *
      * @property lesson The audio lesson to play
      */
-    data class Lesson(val lesson: CourseLesson) : Page
+    data class Lesson(val lesson: CourseLesson) : Route
 
     /**
      * The settings page. Holds the button that opens the debug page.
      */
-    object Settings : Page
+    object Settings : Route
 
     /**
-     * The debug page for navigating to any other page.
+     * The app's own debug page, for navigating to any other page.
      */
-    object Debug : Page
+    object AppDebug : Route
 
     /** The shared library's debug page: app info and animation speed. */
-    object CommonDebug : Page
+    object Debug : Route
 
     /** The shared library's log viewer. */
-    object Logs : Page
+    object Logs : Route
 
     /** The shared library's crash viewer. */
-    object Crashes : Page
-
-    enum class Animation {
-        None,
-        Default,
-    }
+    object Crashes : Route
 }

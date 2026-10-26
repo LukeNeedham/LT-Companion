@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.lukeneedham.languagetransfer.ui.util.SystemBarsColor
 import org.koin.androidx.compose.koinViewModel
@@ -22,61 +23,9 @@ fun DownloadLanguagePage(
     onContinue: () -> Unit,
     viewModel: DownloadLanguageViewModel = koinViewModel(),
 ) {
-    SystemBarsColor(useDarkIcons = true)
-
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp)
-    ) {
-        val state = viewModel.state
-        when (state) {
-            DownloadLanguageState.Done -> {
-                Text(text = "Download completed!")
-                Button(
-                    onClick = {
-                        onContinue()
-                    },
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(text = "Continue")
-                }
-            }
-
-            is DownloadLanguageState.Failed -> {
-                Text(text = "Download failed!")
-                Button(
-                    onClick = {
-                        viewModel.download()
-                    },
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(text = "Retry")
-                }
-            }
-
-            is DownloadLanguageState.InProgress -> {
-                Text(text = "Download in progress...")
-                Spacer(modifier = Modifier.height(20.dp))
-                LinearProgressIndicator(
-                    progress = { state.progressFraction },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            DownloadLanguageState.Ready -> {
-                Text(text = "Ready to download spanish course")
-                Button(
-                    onClick = {
-                        viewModel.download()
-                    },
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(text = "Download")
-                }
-            }
-        }
-    }
+    DownloadLanguagePageContent(
+        state = viewModel.state,
+        onDownload = viewModel::download,
+        onContinue = onContinue,
+    )
 }

@@ -11,9 +11,9 @@ import com.lukeneedham.languagetransfer.ui.feature.lesson.pausepointreport.Pause
 import com.lukeneedham.languagetransfer.ui.util.color.ext.toComposeColors
 
 @Composable
-fun LessonPageContent(
+internal fun LessonPageContent(
     lesson: CourseLesson,
-    uiState: LessonState,
+    uiState: LessonUiState,
     showDebugLessonControls: Boolean,
     onBack: () -> Unit,
     onMainButtonClick: () -> Unit,

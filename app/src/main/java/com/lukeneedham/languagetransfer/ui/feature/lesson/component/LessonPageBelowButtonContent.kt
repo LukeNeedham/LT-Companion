@@ -22,7 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.lukeneedham.languagetransfer.R
 import com.lukeneedham.languagetransfer.ui.feature.common.CutOutGlassyButton
-import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonState
+import com.lukeneedham.languagetransfer.ui.feature.lesson.LessonUiState
 import com.lukeneedham.languagetransfer.ui.feature.lesson.pausepointreport.PausepointReporter
 import com.lukeneedham.languagetransfer.ui.feature.lesson.state.LessonDebugControls
 import com.lukeneedham.languagetransfer.ui.util.AnimatedNullableVisibility
@@ -30,7 +30,7 @@ import com.lukeneedham.languagetransfer.util.model.Millis
 
 @Composable
 fun LessonPageBelowButtonContent(
-    state: LessonState,
+    state: LessonUiState,
     showDebugLessonControls: Boolean,
     jumpBackward: () -> Unit,
     togglePlaybackSpeed: () -> Unit,
@@ -40,10 +40,10 @@ fun LessonPageBelowButtonContent(
     pausepointReporter: PausepointReporter,
 ) {
     val durationBarData = when (state) {
-        is LessonState.Completed,
-        is LessonState.Error -> null
+        is LessonUiState.Completed,
+        is LessonUiState.Error -> null
 
-        is LessonState.InProgress -> {
+        is LessonUiState.InProgress -> {
             DurationBarData(
                 currentPosition = state.currentPosition,
                 totalDuration = state.totalDuration,
@@ -51,7 +51,7 @@ fun LessonPageBelowButtonContent(
             )
         }
 
-        LessonState.Loading -> {
+        LessonUiState.Loading -> {
             DurationBarData(
                 currentPosition = 0,
                 totalDuration = 0,
@@ -61,11 +61,11 @@ fun LessonPageBelowButtonContent(
     }
 
     val showControls = when (state) {
-        is LessonState.Completed,
-        is LessonState.Error -> false
+        is LessonUiState.Completed,
+        is LessonUiState.Error -> false
 
-        is LessonState.InProgress,
-        LessonState.Loading -> true
+        is LessonUiState.InProgress,
+        LessonUiState.Loading -> true
     }
 
     Column(
@@ -82,11 +82,11 @@ fun LessonPageBelowButtonContent(
 
                 if (showDebugLessonControls) {
                     val playbackSpeed = when (state) {
-                        LessonState.Loading,
-                        is LessonState.Completed,
-                        is LessonState.Error -> 1f
+                        LessonUiState.Loading,
+                        is LessonUiState.Completed,
+                        is LessonUiState.Error -> 1f
 
-                        is LessonState.InProgress -> state.playbackSpeed
+                        is LessonUiState.InProgress -> state.playbackSpeed
                     }
                     LessonDebugControls(
                         speed = playbackSpeed,

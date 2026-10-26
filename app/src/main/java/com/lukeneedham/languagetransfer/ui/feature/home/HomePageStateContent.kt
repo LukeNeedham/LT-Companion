@@ -23,12 +23,12 @@ import com.lukeneedham.languagetransfer.ui.feature.home.model.HomeLessonItem
 
 @Composable
 fun HomePageStateContent(
-    state: HomeState,
+    state: HomeUiState,
     lessonListState: LazyListState,
     onLessonClick: (CourseLesson) -> Unit,
 ) {
     when (state) {
-        is HomeState.Loading -> {
+        is HomeUiState.Loading -> {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxSize()
@@ -37,7 +37,7 @@ fun HomePageStateContent(
             }
         }
 
-        is HomeState.Success -> {
+        is HomeUiState.Success -> {
             val lessons = state.lessons
 
             LazyColumn(
@@ -77,7 +77,7 @@ fun HomePageStateContent(
             }
         }
 
-        is HomeState.Error -> {
+        is HomeUiState.Error -> {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier

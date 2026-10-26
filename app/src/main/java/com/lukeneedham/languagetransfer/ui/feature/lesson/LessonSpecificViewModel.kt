@@ -48,7 +48,7 @@ class LessonSpecificViewModel(
     private var isCompleted: Boolean = false
     private var error: String? = null
 
-    private val uiStateMutable = MutableStateFlow<LessonState>(LessonState.Loading)
+    private val uiStateMutable = MutableStateFlow<LessonUiState>(LessonUiState.Loading)
     val uiState = uiStateMutable.asStateFlow()
 
     init {
@@ -99,22 +99,22 @@ class LessonSpecificViewModel(
         return audioPlayerProvider.create(uri, lesson.lessonNumber, callbacks)
     }
 
-    private fun calculateUiState(): LessonState {
+    private fun calculateUiState(): LessonUiState {
         if (isCompleted) {
-            return LessonState.Completed(
+            return LessonUiState.Completed(
                 hasCompletedCourse = nextLesson == null
             )
         }
 
         val e = error
-        if (e != null) return LessonState.Error(e)
+        if (e != null) return LessonUiState.Error(e)
 
-        val playingState = playingState ?: return LessonState.Loading
+        val playingState = playingState ?: return LessonUiState.Loading
 
         val duration = audioPlayer.duration
-        if (duration == 0L) return LessonState.Loading
+        if (duration == 0L) return LessonUiState.Loading
 
-        return LessonState.InProgress(
+        return LessonUiState.InProgress(
             currentPosition = audioPlayer.currentPosition,
             totalDuration = duration,
             playingState = playingState,
