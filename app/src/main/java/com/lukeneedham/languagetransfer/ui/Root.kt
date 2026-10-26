@@ -5,11 +5,11 @@ import com.lukeneedham.common.ui.DebugTheme
 import com.lukeneedham.common.ui.ProvideDebugSettings
 import com.lukeneedham.languagetransfer.ui.navigation.AppNavigation
 import com.lukeneedham.languagetransfer.ui.theme.Colors
-import com.lukeneedham.languagetransfer.ui.theme.LanguageTransferTheme
+import com.lukeneedham.languagetransfer.ui.theme.AppTheme
 
 @Composable
 fun Root() {
-    LanguageTransferTheme {
+    AppTheme {
         ProvideDebugSettings(theme = DebugTheme(background = Colors.background)) {
             AppNavigation()
         }

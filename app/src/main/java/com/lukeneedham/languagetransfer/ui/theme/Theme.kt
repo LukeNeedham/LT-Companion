@@ -3,7 +3,7 @@ package com.lukeneedham.languagetransfer.ui.theme
 import androidx.compose.runtime.Composable
 
 @Composable
-fun LanguageTransferTheme(
+fun AppTheme(
     content: @Composable () -> Unit
 ) {
     content()
