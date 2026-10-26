@@ -1,46 +1,55 @@
 package com.lukeneedham.languagetransfer.ui.navigation
 
-import android.os.Parcelable
+import androidx.navigation3.runtime.NavKey
 import com.lukeneedham.languagetransfer.domain.model.CourseLesson
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 /**
  * The navigation destinations of the app, one per page: [Home] is `HomePage`, and so on.
  */
-@Parcelize
-sealed interface Route : Parcelable {
-    object Startup : Route
+@Serializable
+sealed interface Route : NavKey {
+    @Serializable
+    data object Startup : Route
 
-    object CourseDownload : Route
+    @Serializable
+    data object CourseDownload : Route
 
     /**
      * The home page where users can access the downloaded courses.
      */
-    object Home : Route
+    @Serializable
+    data object Home : Route
 
     /**
      * The lesson page where users can play and interact with a specific lesson.
      *
      * @property lesson The audio lesson to play
      */
+    @Serializable
     data class Lesson(val lesson: CourseLesson) : Route
 
     /**
      * The settings page. Holds the button that opens the debug page.
      */
-    object Settings : Route
+    @Serializable
+    data object Settings : Route
 
     /**
      * The app's own debug page, for navigating to any other page.
      */
-    object AppDebug : Route
+    @Serializable
+    data object AppDebug : Route
 
     /** The shared library's debug page: app info and animation speed. */
-    object Debug : Route
+    @Serializable
+    data object Debug : Route
 
     /** The shared library's log viewer. */
-    object Logs : Route
+    @Serializable
+    data object Logs : Route
 
     /** The shared library's crash viewer. */
-    object Crashes : Route
+    @Serializable
+    data object Crashes : Route
 }

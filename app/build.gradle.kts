@@ -86,7 +86,9 @@ dependencies {
     implementation(libs.koin.androidx.compose)
 
     // Navigation
-    implementation(libs.navigation.reimagined)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
 
     // Serialization
     implementation(libs.kotlinx.serialization.json)
