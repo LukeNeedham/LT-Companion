@@ -59,11 +59,15 @@ private fun AnimatedContentTransitionScope<Scene<NavKey>>.slide(
     }
 }
 
-private fun Scene<NavKey>.isStartup() = entries.lastOrNull()?.key is Route.Startup
+/** The metadata key that marks the startup page's entry: nothing slides into or out of it. */
+private const val StartupMetadataKey = "startup"
+
+private fun Scene<NavKey>.isStartup() = entries.lastOrNull()?.metadata?.get(StartupMetadataKey) == true
 
 private fun routeEntryProvider(backStack: NavBackStack<NavKey>, key: NavKey): NavEntry<NavKey> {
     val route = key as Route
-    return NavEntry(route) {
+    val metadata = if (route is Route.Startup) mapOf<String, Any>(StartupMetadataKey to true) else emptyMap()
+    return NavEntry(route, metadata = metadata) {
         Router(backStack, route)
     }
 }
