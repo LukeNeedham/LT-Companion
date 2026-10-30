@@ -6,6 +6,7 @@ import androidx.navigation3.runtime.NavKey
 import com.lukeneedham.common.ui.CrashesPage
 import com.lukeneedham.common.ui.DebugPage
 import com.lukeneedham.common.ui.LogsPage
+import com.lukeneedham.common.ui.NetworkPage
 import com.lukeneedham.languagetransfer.ui.feature.debug.AppDebugPage
 import com.lukeneedham.languagetransfer.ui.feature.downloadlanguage.DownloadLanguagePage
 import com.lukeneedham.languagetransfer.ui.feature.home.HomePage
@@ -53,11 +54,14 @@ fun Router(backStack: NavBackStack<NavKey>, route: Route) {
             onBack = ::onBack,
             onOpenLogs = { navigateTo(Route.Logs) },
             onOpenCrashes = { navigateTo(Route.Crashes) },
+            onOpenNetwork = { navigateTo(Route.Network) },
         )
 
         Route.Logs -> LogsPage(onBack = ::onBack)
 
         Route.Crashes -> CrashesPage(onBack = ::onBack)
+
+        Route.Network -> NetworkPage(onBack = ::onBack)
 
         Route.AppDebug -> AppDebugPage(
             onBack = ::onBack,
