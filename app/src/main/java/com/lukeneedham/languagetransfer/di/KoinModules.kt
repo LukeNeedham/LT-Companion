@@ -1,10 +1,6 @@
 package com.lukeneedham.languagetransfer.di
 
-import com.lukeneedham.common.network.NetworkLogInterceptor
 import com.lukeneedham.languagetransfer.data.network.FileDownloader
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import com.lukeneedham.languagetransfer.data.network.LanguageDownloadRepository
 import com.lukeneedham.languagetransfer.data.persistence.AppDatabase
 import com.lukeneedham.languagetransfer.data.persistence.prefs.DebugPreferencesDao
@@ -75,13 +71,7 @@ object KoinModules {
 
     private val network
         get() = module {
-            // The one HTTP client of the app: Ktor on OkHttp, with every call recorded for the debug kit network page
-            single {
-                HttpClient(OkHttp) {
-                    install(ContentNegotiation)
-                    engine { addInterceptor(NetworkLogInterceptor()) }
-                }
-            }
+            single { HttpClientFactory.create() }
             factory { FileDownloader(androidContext(), get()) }
         }
 
