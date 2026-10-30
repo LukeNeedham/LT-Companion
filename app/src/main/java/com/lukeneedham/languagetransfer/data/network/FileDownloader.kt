@@ -3,8 +3,6 @@ package com.lukeneedham.languagetransfer.data.network
 import android.content.Context
 import com.lukeneedham.languagetransfer.util.AppResult
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.android.Android
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.onDownload
 import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsChannel
@@ -17,10 +15,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.zip.ZipInputStream
 
-class FileDownloader(private val context: Context) {
-    private val client = HttpClient(Android) {
-        install(ContentNegotiation)
-    }
+class FileDownloader(private val context: Context, private val client: HttpClient) {
 
     /**
      * Downloads a file from the specified URL and saves it to internal storage

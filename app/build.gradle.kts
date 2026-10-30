@@ -74,7 +74,7 @@ dependencies {
 
     // Ktor for network requests
     implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.content.negotiation)
 
     // Kotlin Coroutines

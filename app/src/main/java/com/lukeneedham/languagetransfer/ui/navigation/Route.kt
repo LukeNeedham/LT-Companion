@@ -52,4 +52,8 @@ sealed interface Route : NavKey {
     /** The shared library's crash viewer. */
     @Serializable
     data object Crashes : Route
+
+    /** The shared library's network call viewer. */
+    @Serializable
+    data object Network : Route
 }
