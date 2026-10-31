@@ -17,7 +17,7 @@ before the recording continues.
 ## Tech stack
 
 - **UI**: Jetpack Compose + Material3, custom theme (`ui/theme`)
-- **DI**: Koin (`di/KoinModules.kt`)
+- **DI**: Koin
 - **Navigation**: Navigation 3 (`androidx.navigation3`): `AppNavigation` owns the back stack and `NavDisplay`, `Router` is the exhaustive `when` over the sealed `Route` (`ui/navigation`; see `docs/app-shell.md` in `LukeNeedham/ci-workflows`)
 - **Networking**: Ktor client (downloading the course zip)
 - **Database**: Room (`data/persistence`)
@@ -64,7 +64,7 @@ domain/
   model/          - Core domain models (CourseLesson, LanguageCourse, ...)
   pausepointreport/ - Logic for reporting/adjusting pausepoint accuracy
 di/
-  KoinModules.kt  - All Koin module definitions (single source of DI wiring)
+  KoinModules.kt  - The Koin modules
 ui/
   feature/        - One package per screen/feature (home, lesson, startup,
                     downloadlanguage, debug), each typically with
@@ -100,21 +100,13 @@ util/
 - `Router` (`ui/navigation/Router.kt`) hosts an `AnimatedNavHost` and maps each route to its
   Composable, wiring up navigation callbacks (`onLessonClick`, `onBack`, etc.).
 - Add a new screen by: adding a member of `Route`, a feature package under `ui/feature/` with an `XPage` (gets the ViewModel)
-  and a stateless `internal XPageContent`, each in its own file with its `XViewModel` and `XUiState`, wiring it into `Router`,
-  and registering its ViewModel in `KoinModules`.
+  and a stateless `internal XPageContent`, each in its own file with its `XViewModel` and `XUiState`, wiring it into `Router`.
 
-### DI (Koin)
+### Dependency injection
 
-All DI wiring lives in `di/KoinModules.kt`, grouped into modules (`domain`, `player`, `sfx`,
-`debug`, `network`, `database`, `prefs`, `repository`, `viewModels`) and combined into
-`KoinModules.modules`, started in `App.onCreate()`. When adding a new class that needs
-injection:
-- Add a `single { ... }` (singleton) or `factory { ... }` (new instance per request) binding in
-  the appropriate module.
-- ViewModels are registered with `viewModel { ... }` in the `viewModels` module and obtained in
-  Composables via `koinViewModel()`.
-- `LessonSpecificViewModelFactory` is a manual factory (not a Koin `viewModel`) because it needs
-  to create a new `LessonSpecificViewModel` per lesson with a custom `CoroutineScope`.
+Dependency injection is set up in accordance with the architecture in the [common repo](https://github.com/LukeNeedham/ci-workflows/blob/main/docs/new-app.md#6-app-architecture).
+
+`LessonSpecificViewModelFactory` is a manual factory (not a Koin `viewModel`) because it needs to create a new `LessonSpecificViewModel` per lesson with a custom `CoroutineScope`.
 
 ### ViewModel / state conventions
 
