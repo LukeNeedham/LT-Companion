@@ -39,19 +39,19 @@ class LessonPausepointProvider(
 
             is PausepointReport.TooEarly -> {
                 update {
-                    val pp = report.pausepoint
-                    remove(pp)
-                    val newPP = pp + jumpMillis
-                    add(newPP)
+                    val pausepoint = report.pausepoint
+                    remove(pausepoint)
+                    val newPausepoint = pausepoint + jumpMillis
+                    add(newPausepoint)
                 }
             }
 
             is PausepointReport.TooLate -> {
                 update {
-                    val pp = report.pausepoint
-                    remove(pp)
-                    val newPP = pp - jumpMillis
-                    add(newPP)
+                    val pausepoint = report.pausepoint
+                    remove(pausepoint)
+                    val newPausepoint = pausepoint - jumpMillis
+                    add(newPausepoint)
                 }
             }
 
